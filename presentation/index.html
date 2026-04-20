@@ -8,326 +8,852 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/theme/moon.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
   <style>
-    :root { --r-main-font-size: 32px; }
+    :root { --r-main-font-size: 30px; }
     .reveal { font-family: 'Segoe UI', system-ui, sans-serif; }
     .reveal h1 { font-size: 1.8em; color: #c4b5fd; }
-    .reveal h2 { font-size: 1.4em; color: #93c5fd; }
-    .reveal h3 { font-size: 1.1em; color: #86efac; }
-    .reveal pre { font-size: 0.55em; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .reveal h2 { font-size: 1.35em; color: #93c5fd; }
+    .reveal h3 { font-size: 1.05em; color: #86efac; }
+    .reveal pre { font-size: 0.52em; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
     .reveal code { font-family: 'Fira Code', 'Courier New', monospace; }
-    .tag  { display: inline-block; padding: 2px 10px; border-radius: 99px;
-            font-size: 0.55em; font-weight: bold; vertical-align: middle; margin: 0 4px; }
-    .tag-blue   { background: #1e40af; color: #bfdbfe; }
-    .tag-purple { background: #6d28d9; color: #ede9fe; }
-    .tag-green  { background: #166534; color: #bbf7d0; }
-    .tag-yellow { background: #78350f; color: #fde68a; }
-    .tag-red    { background: #7f1d1d; color: #fecaca; }
-    .box { border-radius: 8px; padding: 16px 20px; margin: 8px 0; text-align: left; }
-    .box-blue   { background: rgba(30,64,175,0.25); border: 1px solid #3b82f6; }
-    .box-purple { background: rgba(109,40,217,0.25); border: 1px solid #8b5cf6; }
-    .box-green  { background: rgba(22,101,52,0.25); border: 1px solid #22c55e; }
-    .box-red    { background: rgba(127,29,29,0.25); border: 1px solid #ef4444; }
-    .box-yellow { background: rgba(120,53,15,0.25); border: 1px solid #f59e0b; }
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
-    .vs-table { width: 100%; border-collapse: collapse; font-size: 0.6em; }
-    .vs-table th { background: rgba(255,255,255,0.1); padding: 8px 12px; text-align: left; }
-    .vs-table td { padding: 7px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .vs-table tr:hover td { background: rgba(255,255,255,0.05); }
-    .center { text-align: center; }
-    .small { font-size: 0.65em; color: #94a3b8; }
-    .mono { font-family: 'Fira Code', monospace; font-size: 0.75em; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; }
-    .ascii { font-family: 'Courier New', monospace; font-size: 0.5em; color: #94a3b8;
-             background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; white-space: pre; text-align: left; }
-    .emoji-big { font-size: 2.5em; }
-    .chip { display: inline-block; border: 1px solid; border-radius: 6px; padding: 4px 10px;
-            font-size: 0.55em; margin: 3px; }
-    .chip-model { background: rgba(16,185,129,0.15); border-color: #10b981; color: #6ee7b7; }
+    .tag  { display:inline-block; padding:2px 10px; border-radius:99px;
+            font-size:0.55em; font-weight:bold; vertical-align:middle; margin:0 4px; }
+    .tag-blue   { background:#1e40af; color:#bfdbfe; }
+    .tag-purple { background:#6d28d9; color:#ede9fe; }
+    .tag-green  { background:#166534; color:#bbf7d0; }
+    .tag-yellow { background:#78350f; color:#fde68a; }
+    .tag-red    { background:#7f1d1d; color:#fecaca; }
+    .box { border-radius:8px; padding:14px 18px; margin:7px 0; text-align:left; }
+    .box-blue   { background:rgba(30,64,175,0.25);  border:1px solid #3b82f6; }
+    .box-purple { background:rgba(109,40,217,0.25); border:1px solid #8b5cf6; }
+    .box-green  { background:rgba(22,101,52,0.25);  border:1px solid #22c55e; }
+    .box-red    { background:rgba(127,29,29,0.25);  border:1px solid #ef4444; }
+    .box-yellow { background:rgba(120,53,15,0.25);  border:1px solid #f59e0b; }
+    .box-gray   { background:rgba(71,85,105,0.25);  border:1px solid #64748b; }
+    .two-col   { display:grid; grid-template-columns:1fr 1fr; gap:18px; text-align:left; }
+    .three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; text-align:left; }
+    .vs-table { width:100%; border-collapse:collapse; font-size:0.58em; }
+    .vs-table th { background:rgba(255,255,255,0.1); padding:8px 12px; text-align:left; }
+    .vs-table td { padding:7px 12px; border-bottom:1px solid rgba(255,255,255,0.08); }
+    .vs-table tr:hover td { background:rgba(255,255,255,0.05); }
+    .center { text-align:center; }
+    .small  { font-size:0.62em; color:#94a3b8; }
+    .mono   { font-family:'Fira Code',monospace; font-size:0.75em; background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px; }
+    .ascii  { font-family:'Courier New',monospace; font-size:0.48em; color:#94a3b8;
+              background:rgba(0,0,0,0.4); padding:12px; border-radius:8px; white-space:pre; text-align:left; }
+    .chip { display:inline-block; border:1px solid; border-radius:6px; padding:4px 10px;
+            font-size:0.55em; margin:3px; }
+    .chip-green  { background:rgba(34,197,94,0.15);  border-color:#22c55e; color:#86efac; }
+    .chip-red    { background:rgba(239,68,68,0.15);   border-color:#ef4444; color:#fca5a5; }
+    .chip-gray   { background:rgba(100,116,139,0.15); border-color:#64748b; color:#94a3b8; }
+    .chip-purple { background:rgba(139,92,246,0.15);  border-color:#8b5cf6; color:#c4b5fd; }
+    .hl-green  { color:#86efac; font-weight:bold; }
+    .hl-red    { color:#fca5a5; font-weight:bold; }
+    .hl-blue   { color:#93c5fd; font-weight:bold; }
+    .hl-yellow { color:#fde68a; font-weight:bold; }
   </style>
 </head>
 <body>
 <div class="reveal">
 <div class="slides">
 
-<!-- ── 1. Title ─────────────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     1. TITLE
+═══════════════════════════════════════════════════════════════════ -->
 <section data-background-gradient="radial-gradient(ellipse at top, #1a1040 0%, #0f1117 70%)">
   <h1>From Micro-Skills<br/>to Deep Agents</h1>
-  <p class="small">LangGraph · Deep Agent Harness · FastAPI vs Aegra · React GUI · HITL</p>
-  <div style="margin-top:28px">
-    <span class="chip chip-model">qwen3:8b — general</span>
-    <span class="chip chip-model">qwen2.5-coder:14b — code</span>
-    <span class="chip chip-model">Ollama @ 10.0.0.224</span>
+  <p class="small">LangGraph · Deep Agent Harness · FastAPI vs Aegra · HITL</p>
+  <div style="margin-top:24px">
+    <span class="chip chip-purple">Orchestrator — general LLM</span>
+    <span class="chip chip-purple">Coder skill — code LLM</span>
+    <span class="chip chip-purple">LLM Gateway</span>
   </div>
+  <p class="small" style="margin-top:20px">↓ navigate down for deep dives &nbsp;&nbsp; → next topic</p>
 </section>
 
-<!-- ── 2. The Problem ────────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     2. THE PROBLEM
+═══════════════════════════════════════════════════════════════════ -->
 <section>
-  <h2>The Problem</h2>
-  <div class="two-col" style="font-size:0.72em">
+  <h2>The Problem with Today's Setup</h2>
+  <div class="two-col" style="font-size:0.68em">
     <div class="box box-red">
-      <div style="font-weight:bold;color:#fca5a5;margin-bottom:8px">⚠ Team Split</div>
+      <div style="font-weight:bold;color:#fca5a5;margin-bottom:8px">⚠ Fragmented Toolchain</div>
       <ul>
-        <li>Some use <strong>LangGraph</strong> for loops / logic</li>
-        <li>Others use <strong>OpenCode</strong> for terminal skills</li>
+        <li>Team split: <strong>LangGraph</strong> for loops vs <strong>OpenCode</strong> for terminal skills</li>
         <li>Raw FastAPI glue between them</li>
-        <li>Separate memory, state, context</li>
+        <li>Separate memory, context, threading per tool</li>
+        <li>No shared state between sessions</li>
       </ul>
     </div>
     <div class="box box-red">
-      <div style="font-weight:bold;color:#fca5a5;margin-bottom:8px">⚠ Integration Pain</div>
+      <div style="font-weight:bold;color:#fca5a5;margin-bottom:8px">⚠ OpenCode Limits</div>
       <ul>
-        <li>SSE streaming is hard to parse</li>
-        <li>No standard event contract</li>
-        <li>Glean / Azure Foundry bolted on</li>
-        <li>K8s deploy requires LangSmith license</li>
+        <li>Great at a developer terminal — not production-ready</li>
+        <li>No persistent thread state across tasks</li>
+        <li>No structured planning — humans verify nothing</li>
+        <li>Context window fills with file content</li>
+        <li>Can't pause mid-task for human input</li>
       </ul>
     </div>
   </div>
-  <div class="box box-yellow" style="margin-top:16px;font-size:0.65em">
-    <strong style="color:#fde68a">Result:</strong> duplicated context, brittle streaming, no unified state management
+  <div class="box box-yellow" style="margin-top:14px;font-size:0.63em">
+    <strong style="color:#fde68a">Goal:</strong>
+    one harness that replaces OpenCode for shared tasks, adds state + planning + specialised LLMs + human oversight, and deploys to any platform.
   </div>
 </section>
 
-<!-- ── 3. Solution Overview ──────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     3. WHY NOT OPENCODE
+═══════════════════════════════════════════════════════════════════ -->
 <section>
-  <h2>Solution: Deep Agent Harness</h2>
-  <div class="ascii">
-┌───────────────────────────────────────────────────────┐
-│                   React GUI (SSE)                      │
-│         FastAPI (raw SSE)  │  Aegra (Platform API)    │
-└────────────────┬───────────┴──────────────────────────┘
-                 │ LangGraph StateGraph
-     ┌───────────▼─────────────────────────────────┐
-     │              Deep Agent                      │
-     │  ┌──────────┐  ┌────────┐  ┌─────────────┐ │
-     │  │  Planner │  │  VFS   │  │  Skills Bus │ │
-     │  │ (todos)  │  │(files) │  │ (sub-LLMs)  │ │
-     │  └──────────┘  └────────┘  └─────────────┘ │
-     │         ↕ HITL Interrupt ↕                  │
-     └─────────────────────────────────────────────┘
-           │              │              │
-      qwen3:8b    qwen2.5-coder:14b   Glean/Search
-  </div>
-</section>
 
-<!-- ── 4. Simple LangGraph Agent ─────────────────────────────────────────────── -->
-<section>
-  <h2>1 — Simple LangGraph Agent</h2>
-  <p class="small">create_react_agent: LLM ↔ Tools loop. Minimal setup.</p>
-  <pre><code class="python">from langgraph.prebuilt import create_react_agent
-from langgraph.checkpoint.memory import MemorySaver
-from langchain_core.tools import tool
+  <!-- 3a — comparison -->
+  <section>
+    <h2>Why Deep Agents Beat OpenCode</h2>
+    <table class="vs-table">
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th><span class="tag tag-red">OpenCode / raw scripting</span></th>
+          <th><span class="tag tag-purple">Deep Agent (LangGraph)</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Persistent thread state</td><td>❌ lost on process exit</td><td>✅ saved to checkpointer</td></tr>
+        <tr><td>Structured planning</td><td>❌ implicit in prompt only</td><td>✅ write_todos → published plan</td></tr>
+        <tr><td>File management</td><td>❌ dumps files into context</td><td>✅ VFS — files never touch context window</td></tr>
+        <tr><td>Multi-model routing</td><td>❌ one model for everything</td><td>✅ right model per task (skills bus)</td></tr>
+        <tr><td>Human-in-the-loop</td><td>❌ ctrl-C and re-run</td><td>✅ interrupt() → choice → resume</td></tr>
+        <tr><td>Audit / replay</td><td>❌ log file only</td><td>✅ full state history in checkpointer</td></tr>
+        <tr><td>Platform deployment</td><td>❌ developer laptop only</td><td>✅ K8s + Aegra, LangFlow, Foundry</td></tr>
+        <tr><td>Nested sub-agents</td><td>❌ manual piping</td><td>✅ any graph is a tool</td></tr>
+      </tbody>
+    </table>
+  </section>
 
-_store = {}
+  <!-- 3b — for opencode devs specifically -->
+  <section>
+    <h2>For OpenCode Developers — The Migration</h2>
+    <div class="two-col" style="font-size:0.65em">
+      <div>
+        <div class="box box-red">
+          <strong style="color:#fca5a5">What you do today (OpenCode)</strong>
+          <pre style="margin-top:8px"><code class="bash"># You: write a prompt, run it, wait, read output
+opencode "Analyze sales data in ./data.csv,
+          write a Python script to visualise it,
+          then run it and show me the chart"
 
-@tool
-def write_data(key: str, value: str) -> str:
-    """Write a key-value pair to the data store."""
-    _store[key] = value
-    return f"Stored: {key!r} = {value!r}"
-
-@tool
-def read_data(key: str) -> str:
-    """Read a value from the data store."""
-    return _store.get(key, f"Not found: {key!r}")
-
-llm = ChatOllama(model="qwen3:8b", base_url="http://10.0.0.224:11434")
-agent = create_react_agent(llm, [write_data, read_data],
-                           checkpointer=MemorySaver())</code></pre>
-  <div class="small center">LangGraph manages the ReAct loop: LLM → tool call → result → LLM → ...</div>
-</section>
-
-<!-- ── 5. Deep Agent Anatomy ──────────────────────────────────────────────────── -->
-<section>
-  <h2>2 — Deep Agent: State + VFS</h2>
-  <div class="two-col" style="font-size:0.62em">
-    <div>
-      <div class="box box-purple" style="font-size:0.9em">
-        <strong style="color:#c4b5fd">State Shape</strong>
-        <pre style="margin-top:8px"><code class="python">class DeepAgentState(TypedDict):
-    messages: Annotated[list, add_messages]
-    todos:    list[str]   # plan
-    vfs_keys: list[str]   # file index</code></pre>
-      </div>
-      <div class="box box-green" style="font-size:0.9em;margin-top:8px">
-        <strong style="color:#86efac">VFS Tools</strong>
-        <pre style="margin-top:8px"><code class="python">@tool
-def write_file(path, content,
-               config: RunnableConfig):
-    thread_id = config["configurable"]["thread_id"]
-    _vfs_store[thread_id][path] = content
-    return f"Written {len(content)} bytes"</code></pre>
-      </div>
-    </div>
-    <div>
-      <div class="box box-blue" style="font-size:0.9em">
-        <strong style="color:#93c5fd">Graph Structure</strong>
-        <div class="ascii" style="font-size:1em;margin-top:6px">
- ┌──────────────┐
- │  agent node  │◄───┐
- │  (LLM bound  │    │
- │   to tools)  │    │
- └──────┬───────┘    │
-        │ tool calls │
- ┌──────▼───────┐    │
- │  tools node  │────┘
- │  (ToolNode)  │
- └──────────────┘
+# Single shot. If it fails halfway:
+# — context is gone
+# — re-run from scratch
+# — no record of what it tried</code></pre>
         </div>
       </div>
-      <div class="box box-yellow" style="font-size:0.9em;margin-top:8px">
-        <strong style="color:#fde68a">Planning Tool</strong>
-        <pre style="margin-top:8px"><code class="python">@tool
-def write_todos(todos: list[str],
-                config: RunnableConfig):
-    """Set the agent's step-by-step plan."""
-    _todos_store[thread_id] = todos</code></pre>
+      <div>
+        <div class="box box-green">
+          <strong style="color:#86efac">What you do with Deep Agent</strong>
+          <pre style="margin-top:8px"><code class="python"># Same task — but now:
+# 1. Agent publishes its plan (write_todos)
+# 2. Reads the file into VFS (not context)
+# 3. Calls analyze_data skill (right LLM)
+# 4. Calls write_code skill (coder LLM)
+# 5. Saves result to VFS path
+# 6. Asks YOU: "run it or refine first?" (HITL)
+# 7. State saved — resume tomorrow if needed
+
+agent.invoke({
+    "messages": [{"role": "user",
+        "content": "Analyze data.csv and write viz code"}]
+}, config={"configurable": {"thread_id": "proj-42"}})</code></pre>
+        </div>
       </div>
     </div>
-  </div>
+    <div class="box box-blue" style="font-size:0.62em;margin-top:6px">
+      The LLM gateway connection, model names, and tool selection stay exactly the same as what you configure today — only the <em>orchestration layer</em> changes.
+    </div>
+  </section>
+
 </section>
 
-<!-- ── 6. Skills as Tools ─────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     4. SOLUTION OVERVIEW
+═══════════════════════════════════════════════════════════════════ -->
 <section>
-  <h2>3 — Skills: Tools that call LLMs</h2>
-  <p class="small">Each skill is a specialized sub-LLM call — different models per task</p>
-  <pre><code class="python">@tool
+  <h2>Deep Agent Harness — Architecture</h2>
+  <div class="ascii">
+┌─────────────────────────────────────────────────────────────────┐
+│   Client  (HTTP / SDK / LangFlow / Foundry / your script)       │
+│   FastAPI raw SSE (port 8000)  │  Aegra Platform API (port 8001) │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │  LangGraph StateGraph  (compiled graph)
+         ┌─────────────▼───────────────────────────────────────┐
+         │                    Deep Agent                        │
+         │   ┌───────────┐  ┌─────────────┐  ┌─────────────┐  │
+         │   │  Planner  │  │     VFS     │  │ Skills Bus  │  │
+         │   │ (todos)   │  │  (files)    │  │ (sub-LLMs)  │  │
+         │   └───────────┘  └─────────────┘  └─────────────┘  │
+         │                ↕ HITL Interrupt ↕                   │
+         └─────────────────────────────────────────────────────┘
+                │                  │                  │
+           Orchestrator       Coder skill        Search skill
+          (general LLM)     (code LLM)         (Glean + LLM)
+                │                  │                  │
+         └──────────────────────────────────────────────┘
+                           LLM Gateway
+  </div>
+  <div class="small center" style="margin-top:8px">All LLM calls route through your existing LLM Gateway — no direct model endpoints in application code.</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     5. CONFIGURING THE LLM GATEWAY  (new — important for devs)
+═══════════════════════════════════════════════════════════════════ -->
+<section>
+
+  <!-- 5a — config.py -->
+  <section>
+    <h2>Configuring the LLM Gateway</h2>
+    <p class="small">One place to set. Everything — orchestrator, all skills, all sub-agents — reads from here.</p>
+    <pre><code class="python"># agents/config.py  ← the single source of truth
+
+from langchain_openai import ChatOpenAI   # OpenAI-compatible API
+
+# ── LLM Gateway endpoint ────────────────────────────────────────
+LLM_GATEWAY_URL = "https://llm-gateway.your-org.internal/v1"
+LLM_GATEWAY_KEY = os.environ["LLM_GATEWAY_API_KEY"]   # set in env / K8s secret
+
+# ── Model aliases — change these to whatever the gateway exposes ─
+MODEL_GENERAL = "general"    # general-purpose reasoning
+MODEL_CODE    = "coder"      # code-optimized model
+MODEL_FAST    = "fast"       # lightweight, low-latency
+
+def make_llm(model: str = MODEL_GENERAL, temperature: float = 0.1):
+    """Return a LangChain ChatOpenAI pointed at the internal gateway."""
+    return ChatOpenAI(
+        model=model,
+        temperature=temperature,
+        base_url=LLM_GATEWAY_URL,
+        api_key=LLM_GATEWAY_KEY,
+    )</code></pre>
+    <div class="box box-blue" style="font-size:0.6em;margin-top:8px">
+      Any OpenAI-compatible gateway works: LiteLLM proxy, Azure OpenAI, vLLM, TGI.
+      If the gateway uses a different SDK, swap <code>ChatOpenAI</code> for the matching
+      LangChain integration — <code>make_llm()</code> is the only place to change.
+    </div>
+  </section>
+
+  <!-- 5b — skills use it -->
+  <section>
+    <h2>Every Skill Uses make_llm()</h2>
+    <p class="small">Skills are just tools that call make_llm() — each gets the right model for its job.</p>
+    <pre><code class="python"># agents/skills.py
+
+from agents.config import make_llm, MODEL_GENERAL, MODEL_CODE
+from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.tools import tool
+
+@tool
 def analyze_data(data: str) -> str:
-    """Analyze data — uses the reasoning model."""
-    llm = ChatOllama(model="qwen3:8b", ...)       # 🧠 general reasoning
-    return llm.invoke([SystemMessage("You are a data analyst..."),
-                       HumanMessage(data)]).content
+    """Analyze data and return structured insights."""
+    llm = make_llm(MODEL_GENERAL)          # ← general reasoning model
+    return llm.invoke([
+        SystemMessage("You are a senior data analyst. Be concise and structured."),
+        HumanMessage(f"Analyze this data:\n{data}"),
+    ]).content
 
 @tool
 def write_code(task: str, language: str = "python") -> str:
-    """Write code — uses the specialized coder model."""
-    llm = ChatOllama(model="qwen2.5-coder:14b", ...)  # 💻 code-specialized
-    return llm.invoke([SystemMessage(f"Expert {language} programmer..."),
-                       HumanMessage(task)]).content
+    """Write production-quality code for a given task."""
+    llm = make_llm(MODEL_CODE)             # ← code-specialized model
+    return llm.invoke([
+        SystemMessage(f"You are an expert {language} developer. Write clean, documented code."),
+        HumanMessage(task),
+    ]).content
 
 @tool
 def search_knowledge(query: str) -> str:
-    """Search internal KB — simulates Glean."""
-    # RAG over mock corpus + LLM synthesis
-    ...</code></pre>
-  <div class="box box-green" style="font-size:0.6em;margin-top:8px">
-    The orchestrator (qwen3:8b) chooses WHICH skill to call. Each skill runs its own LLM in isolation.
-    This is the "polymorphic" pattern: one interface, many implementations.
-  </div>
+    """Search internal knowledge base and synthesise an answer."""
+    llm = make_llm(MODEL_GENERAL)          # ← synthesis after Glean retrieval
+    # ... Glean API call + LLM synthesis ...</code></pre>
+    <div class="box box-yellow" style="font-size:0.6em;margin-top:6px">
+      To change the model for a skill: update <code>MODEL_CODE</code> or <code>MODEL_GENERAL</code>
+      in <code>config.py</code>. No other file changes needed.
+    </div>
+  </section>
+
+  <!-- 5c — environment variables -->
+  <section>
+    <h2>Environment Setup for Developers</h2>
+    <div class="two-col" style="font-size:0.65em">
+      <div>
+        <div class="box box-green">
+          <strong style="color:#86efac">Local .env file</strong>
+          <pre style="margin-top:8px"><code class="bash"># .env  (never commit this)
+LLM_GATEWAY_API_KEY=sk-your-key-here
+LLM_GATEWAY_URL=https://llm-gateway.your-org.internal/v1
+
+# Optional: override model names
+MODEL_GENERAL=gpt-4o-mini
+MODEL_CODE=gpt-4o
+MODEL_FAST=gpt-3.5-turbo</code></pre>
+        </div>
+        <div class="box box-blue" style="margin-top:8px">
+          <strong style="color:#93c5fd">Load it</strong>
+          <pre style="margin-top:8px"><code class="python"># agents/config.py top
+from dotenv import load_dotenv
+load_dotenv()   # reads .env automatically
+
+LLM_GATEWAY_URL = os.getenv(
+    "LLM_GATEWAY_URL",
+    "https://llm-gateway.your-org.internal/v1"
+)
+LLM_GATEWAY_KEY = os.environ["LLM_GATEWAY_API_KEY"]</code></pre>
+        </div>
+      </div>
+      <div>
+        <div class="box box-purple">
+          <strong style="color:#c4b5fd">What each developer needs</strong><br/><br/>
+          <ol style="line-height:2">
+            <li>LLM gateway API key (from team lead)</li>
+            <li>Python 3.11+</li>
+            <li><code>pip install -r requirements.txt</code></li>
+            <li>Copy <code>.env.example → .env</code>, fill in key</li>
+            <li><code>bash run.sh</code></li>
+          </ol>
+        </div>
+        <div class="box box-yellow" style="margin-top:8px">
+          <strong style="color:#fde68a">Coming from OpenCode?</strong><br/><br/>
+          Your existing API key from the LLM gateway works directly —
+          same credentials, same endpoint, just wired through <code>config.py</code>.
+        </div>
+      </div>
+    </div>
+  </section>
+
 </section>
 
-<!-- ── 7. HITL ───────────────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     6. VFS — DEEP DIVE
+═══════════════════════════════════════════════════════════════════ -->
 <section>
-  <h2>4 — Human-in-the-Loop</h2>
-  <div class="two-col" style="font-size:0.7em">
-    <div>
-      <pre><code class="python">from langgraph.types import interrupt
+
+  <!-- 6a — what is VFS and why -->
+  <section>
+    <h2>Virtual File System (VFS) — The Core Idea</h2>
+    <div class="two-col" style="font-size:0.65em">
+      <div>
+        <div class="box box-red">
+          <strong style="color:#fca5a5">Without VFS — the context problem</strong>
+          <div class="ascii" style="margin-top:8px;font-size:1.0em">
+ Context window (128k tokens)
+ ┌────────────────────────────────────┐
+ │ System prompt           ~500 tok  │
+ │ User: "write a report"   ~30 tok  │
+ │ Tool result: analysis   ~800 tok  │
+ │ FILE: data.csv         ~2000 tok  │  ← !!
+ │ FILE: report.txt       ~3000 tok  │  ← !!
+ │ FILE: chart.py         ~1500 tok  │  ← !!
+ │ Agent reasoning        ~400 tok   │
+ │ ... more tool calls ...           │
+ │            ↑ CONTEXT FULL ↑       │
+ └────────────────────────────────────┘
+ Agent can no longer reason.
+ Task fails or hallucinates.
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="box box-green">
+          <strong style="color:#86efac">With VFS — files never enter context</strong>
+          <div class="ascii" style="margin-top:8px;font-size:1.0em">
+ Context window (128k tokens)
+ ┌────────────────────────────────────┐
+ │ System prompt           ~500 tok  │
+ │ User: "write a report"   ~30 tok  │
+ │ Tool result: analysis   ~800 tok  │
+ │ write_file("data.csv")  ~10 tok   │  ← ref only
+ │ write_file("report.txt") ~10 tok  │  ← ref only
+ │ write_file("chart.py")  ~10 tok   │  ← ref only
+ │ Agent reasoning        ~400 tok   │
+ │                                   │
+ │     ← PLENTY OF SPACE LEFT →      │
+ └────────────────────────────────────┘
+ Agent stays sharp across many tasks.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6b — how VFS works internally -->
+  <section>
+    <h2>VFS — How It Works</h2>
+    <div class="two-col" style="font-size:0.65em">
+      <div>
+        <pre><code class="python"># Per-thread, in-memory dict (swap for Redis / S3)
+_vfs: dict[str, dict[str, str]] = defaultdict(dict)
+# key = thread_id → { path → content }
 
 @tool
-def request_options(
-    question: str,
-    options: list[str],
-    config: RunnableConfig
-) -> str:
-    # Pauses the graph here.
-    # State is saved to checkpointer.
-    # GUI receives "interrupt" event.
+def write_file(path: str, content: str,
+               config: RunnableConfig) -> str:
+    """Write content to a virtual file."""
+    tid = config["configurable"]["thread_id"]
+    _vfs[tid][path] = content
+    return f"Written {len(content)} bytes to {path!r}"
+
+@tool
+def read_file(path: str,
+              config: RunnableConfig) -> str:
+    """Read a virtual file."""
+    tid = config["configurable"]["thread_id"]
+    return _vfs[tid].get(path, f"File not found: {path!r}")
+
+@tool
+def list_files(config: RunnableConfig) -> str:
+    """List all files in the virtual file system."""
+    tid = config["configurable"]["thread_id"]
+    files = list(_vfs[tid].keys())
+    return "\n".join(files) if files else "No files yet."</code></pre>
+      </div>
+      <div>
+        <div class="box box-purple">
+          <strong style="color:#c4b5fd">Thread isolation</strong><br/><br/>
+          Every conversation (thread) has its own namespace in <code>_vfs</code>.
+          Concurrent users never see each other's files. The key is
+          injected via <code>RunnableConfig</code> — LangGraph handles this
+          automatically when you pass <code>thread_id</code> in the config.
+        </div>
+        <div class="box box-blue" style="margin-top:8px">
+          <strong style="color:#93c5fd">Production swap</strong><br/><br/>
+          The in-memory dict is a demo store. Replace the two lines that
+          read/write <code>_vfs[tid]</code> with any key/value backend:
+          Redis, S3, Postgres <code>jsonb</code>, or a proper blob store.
+          No other code changes needed.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6c — VFS workflow example -->
+  <section>
+    <h2>VFS — Real Workflow</h2>
+    <div class="ascii" style="font-size:0.9em">
+ User: "Analyze sales data, write a Python visualisation, explain results"
+
+ Step 1 → write_todos(["analyze data","write code","write summary"])
+           todos visible to reviewers immediately
+
+ Step 2 → analyze_data("sales=120, users=80, churn=5%")
+           returns: "Revenue up 12%, churn risk in segment B..."
+           write_file("analysis.txt", &lt;analysis result&gt;)   ← NOT in context
+
+ Step 3 → write_code("visualise sales trend as bar chart")
+           returns: &lt;300 lines of Python&gt;
+           write_file("chart.py", &lt;code&gt;)                   ← NOT in context
+
+ Step 4 → request_options("Run chart.py or refine first?",
+                           ["Run it now", "Refine the analysis"])
+           PAUSED — waits for human
+
+ Step 5 → Human picks "Run it now" → Command(resume="Run it now")
+           Agent reads chart.py path from state, calls run tool
+           write_file("chart.png", &lt;binary&gt;)
+
+ Context window throughout: ~2,000 tokens total. Never overflows.
+    </div>
+    <div class="box box-green" style="font-size:0.62em;margin-top:8px">
+      The agent never holds file <em>content</em> in messages — only <em>paths</em>.
+      Full content is in VFS, retrieved on demand by tools or the consumer.
+    </div>
+  </section>
+
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     7. DEEP AGENT — STATE + GRAPH
+═══════════════════════════════════════════════════════════════════ -->
+<section>
+
+  <!-- 7a — state shape and graph -->
+  <section>
+    <h2>Deep Agent — State &amp; Graph</h2>
+    <div class="two-col" style="font-size:0.63em">
+      <div>
+        <div class="box box-purple">
+          <strong style="color:#c4b5fd">State TypedDict</strong>
+          <pre style="margin-top:8px"><code class="python">class DeepAgentState(TypedDict):
+    # Append-only message list
+    # LangGraph manages reduction
+    messages: Annotated[list, add_messages]
+
+    # Published by write_todos tool
+    # Visible to clients in real time
+    todos: list[str]
+
+    # Index of paths in VFS
+    # Content stored off-graph
+    vfs_keys: list[str]</code></pre>
+        </div>
+        <div class="box box-yellow" style="margin-top:8px">
+          <strong style="color:#fde68a">Why custom StateGraph?</strong><br/><br/>
+          <code>create_react_agent</code> gives you <code>messages</code> only.
+          Custom <code>StateGraph</code> adds <code>todos</code> and <code>vfs_keys</code>
+          as first-class state — they persist across interrupts, survive
+          time-travel replay, and are queryable from <code>GET /threads/{id}/state</code>.
+        </div>
+      </div>
+      <div>
+        <div class="ascii" style="font-size:1.1em">
+ Graph structure:
+
+ ┌────────────────────┐
+ │    agent_node      │◄─────────────────┐
+ │                    │                  │
+ │  LLM with all      │                  │
+ │  tools bound       │──tool calls──►   │
+ │                    │                  │
+ │  No tools called?  │──► END           │
+ └────────────────────┘                  │
+           │                             │
+ ┌─────────▼──────────┐                  │
+ │    tools_node      │──────────────────┘
+ │                    │
+ │  ToolNode executes │  updated state
+ │  all pending calls │  (messages + todos
+ │                    │   + vfs_keys)
+ └────────────────────┘
+        </div>
+        <div class="box box-blue" style="font-size:0.85em;margin-top:8px">
+          The loop runs until the LLM produces a response with <em>no tool calls</em>.
+          HITL interrupt breaks out of the loop mid-execution.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7b — skills -->
+  <section>
+    <h2>Skills Bus — Right Model per Task</h2>
+    <p class="small">Each skill calls <code>make_llm()</code> with the appropriate model alias.</p>
+    <pre><code class="python">@tool
+def analyze_data(data: str) -> str:
+    """Analyze data — routed to the general reasoning model."""
+    return make_llm(MODEL_GENERAL).invoke([
+        SystemMessage("Senior data analyst. Return structured findings."),
+        HumanMessage(data),
+    ]).content
+
+@tool
+def write_code(task: str, language: str = "python") -> str:
+    """Write code — routed to the code-specialized model."""
+    return make_llm(MODEL_CODE).invoke([
+        SystemMessage(f"Expert {language} developer. Clean, documented code."),
+        HumanMessage(task),
+    ]).content
+
+@tool
+def search_knowledge(query: str) -> str:
+    """Search internal KB (Glean) and synthesise an answer."""
+    hits = _call_glean_api(query)          # raw search results
+    return make_llm(MODEL_GENERAL).invoke([
+        SystemMessage("Synthesise a precise answer from the search results."),
+        HumanMessage(f"Results:\n{hits}\n\nQuestion: {query}"),
+    ]).content</code></pre>
+    <div class="box box-purple" style="font-size:0.6em;margin-top:6px">
+      Orchestrator (general LLM) picks which skill to call.
+      Skill runs its own LLM call in isolation. Results flow back as tool output — never as file content in context.
+    </div>
+  </section>
+
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     8. HITL
+═══════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>Human-in-the-Loop</h2>
+  <div class="two-col" style="font-size:0.67em">
+    <div>
+      <pre><code class="python">from langgraph.types import interrupt, Command
+
+@tool
+def request_options(question: str,
+                    options: list[str],
+                    config: RunnableConfig) -> str:
+    # Execution pauses here.
+    # Full graph state saved to checkpointer.
+    # Thread returns "interrupted" status.
     choice = interrupt({
         "question": question,
-        "options": options
+        "options":  options,
     })
-    return f"Human chose: {choice}"</code></pre>
-      <pre><code class="python"># Resume with human's choice:
-from langgraph.types import Command
+    return f"Human chose: {choice!r}"
 
+# Resume — from any process, any time:
 agent.invoke(
-    Command(resume="option A"),
+    Command(resume="Full report"),
     config={"configurable": {
-        "thread_id": "abc123"
+        "thread_id": "proj-42"
     }}
 )</code></pre>
     </div>
     <div>
-      <div class="ascii" style="font-size:1.1em">
+      <div class="ascii" style="font-size:1.05em">
  Agent running...
-        │
-  ┌─────▼──────────┐
-  │ request_options │
-  │  "Choose model" │
-  │  [A] qwen3:8b   │
-  │  [B] llama3.1   │
-  └─────┬──────────┘
-        │ interrupt()
-  ┌─────▼──────────┐
-  │  GUI shows     │
-  │  choice dialog │
-  └─────┬──────────┘
-        │ Command(resume=choice)
-  ┌─────▼──────────┐
-  │ Agent resumes  │
-  │ from same state│
-  └────────────────┘
+         │
+ ┌───────▼────────────┐
+ │  request_options   │
+ │  "Choose depth"    │
+ │  [A] Summary       │
+ │  [B] Full report   │
+ └───────┬────────────┘
+         │  interrupt()
+         │  ← state frozen in checkpointer
+         │  ← HTTP response: "interrupted"
+         │
+    human reviews plan,
+    picks option B
+         │
+         │  Command(resume="Full report")
+ ┌───────▼────────────┐
+ │  Agent resumes     │
+ │  exact state       │
+ │  choice injected   │
+ └────────────────────┘
       </div>
-      <div class="box box-purple" style="font-size:0.85em;margin-top:8px">
-        Thread state is fully persisted between pause and resume — no context lost.
+      <div class="box box-purple" style="font-size:0.82em;margin-top:8px">
+        Resume can come from a different process, hours later.
+        All VFS files, todos, and message history are intact.
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── 8. FastAPI: Raw SSE ────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     9. NESTING LANGGRAPH AGENTS
+═══════════════════════════════════════════════════════════════════ -->
 <section>
-  <h2>5 — FastAPI: Raw SSE Approach</h2>
-  <pre><code class="python">@app.post("/api/deep/stream")
-async def stream_deep(req: RunRequest):
-    async def generator():
-        async for event in agent.astream_events(
-            {"messages": [...]}, version="v2"
-        ):
-            # Manual if/elif on every event type
-            if event["event"] == "on_chat_model_stream":
-                yield {"data": json.dumps({
-                    "type": "token",            # ← your custom schema
-                    "content": event["data"]["chunk"].content
-                })}
-            elif event["event"] == "on_tool_start":
-                yield {"data": json.dumps({
-                    "type": "tool_start",       # ← you define every field
-                    "tool": event["name"],
-                    "input": event["data"]["input"]
-                })}
-            # ... 6 more elif branches ...
-    return EventSourceResponse(generator())</code></pre>
-  <div class="box box-yellow" style="font-size:0.6em;margin-top:8px">
-    <strong>Front-end parses:</strong> <span class="mono">data.type === "token"</span>,
-    <span class="mono">data.type === "tool_start"</span>, etc. — <em>your</em> schema, nobody else knows it.
-  </div>
+
+  <!-- 9a — concept -->
+  <section>
+    <h2>Hosting LangGraph Agents Inside Deep Agents</h2>
+    <div class="box box-blue" style="font-size:0.67em;margin-bottom:14px">
+      Any compiled LangGraph graph can be wrapped as a <strong>tool</strong> and given to a parent agent.
+      The parent treats it like any other tool — it receives a task string, runs the sub-graph
+      fully (including its own tool loops), and returns a result string back to the parent.
+    </div>
+    <pre><code class="python">from langgraph.prebuilt import create_react_agent
+
+# Sub-agent with its own specialised tools
+CODE_AGENT = create_react_agent(
+    make_llm(MODEL_CODE),
+    tools=[write_file, read_file, list_files],
+    checkpointer=MemorySaver(),
+)
+
+@tool
+def delegate_coding(task: str, config: RunnableConfig) -> str:
+    """Delegate a full coding task to the specialist code agent."""
+    tid = config["configurable"]["thread_id"]
+    result = CODE_AGENT.invoke(
+        {"messages": [{"role": "user", "content": task}]},
+        # sub-agent gets its own thread namespace
+        config={"configurable": {"thread_id": f"{tid}:code"}},
+    )
+    return result["messages"][-1].content
+
+# Give this tool to the Deep Agent orchestrator
+DEEP_AGENT = build_deep_agent(extra_tools=[delegate_coding])</code></pre>
+  </section>
+
+  <!-- 9b — patterns -->
+  <section>
+    <h2>Sub-Agent Patterns</h2>
+    <div class="three-col" style="font-size:0.63em">
+      <div class="box box-purple">
+        <strong style="color:#c4b5fd">Specialist delegation</strong><br/><br/>
+        Orchestrator handles planning + HITL.
+        Delegates coding, analysis, or search
+        to dedicated sub-graphs configured
+        with the right model and tools.
+      </div>
+      <div class="box box-green">
+        <strong style="color:#86efac">Parallel fan-out</strong><br/><br/>
+        LangGraph <code>Send()</code> runs multiple
+        sub-agents in parallel. Each writes
+        results to VFS. Orchestrator
+        synthesises when all finish.
+      </div>
+      <div class="box box-blue">
+        <strong style="color:#93c5fd">Recursive depth</strong><br/><br/>
+        Sub-agent can itself have sub-agents.
+        Each level gets a unique thread-id
+        suffix — checkpointers don't collide.
+        Depth limited by latency budget.
+      </div>
+    </div>
+    <div class="ascii" style="margin-top:10px;font-size:1.0em">
+ Deep Agent (orchestrator · general LLM · all tools)
+   ├── write_todos / write_file / request_options   ← native tools
+   ├── analyze_data   → inline skill (same process, general LLM)
+   ├── delegate_coding  → CODE_AGENT sub-graph  (code LLM)
+   └── delegate_search  → SEARCH_AGENT sub-graph (general LLM + Glean)
+    </div>
+  </section>
+
 </section>
 
-<!-- ── 9. Aegra: Platform API ─────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     10. DEV ENVIRONMENT SETUP
+═══════════════════════════════════════════════════════════════════ -->
 <section>
-  <h2>6 — Aegra: LangGraph Platform API</h2>
-  <pre><code class="python"># Implements the LangGraph Platform REST spec
-# (same API that official LangSmith runtime exposes)
 
-POST  /threads                    → { thread_id, status }
-GET   /threads/{id}/state         → full state snapshot
-POST  /threads/{id}/runs/stream   → SSE with typed events
+  <!-- 10a — quick start -->
+  <section>
+    <h2>Using Deep Agents in Your Dev Environment</h2>
+    <div class="two-col" style="font-size:0.65em">
+      <div>
+        <div class="box box-green">
+          <strong style="color:#86efac">5-minute setup</strong>
+          <pre style="margin-top:8px"><code class="bash"># 1. Clone and install
+git clone https://github.com/your-org/langgraph-agent-patterns
+cd langgraph-agent-patterns
+pip install -r requirements.txt
 
-# SSE event names are standardised:
-event: metadata     data: { "run_id": "...", "assistant_id": "..." }
-event: updates      data: { "node": "agent", "state": {...} }
-event: messages/partial  data: { "content": "token..." }
-event: tool_start   data: { "tool": "write_code", "input": {...} }
-event: interrupt    data: { "run_id": "...", "value": {...} }
-event: values       data: { ...full final state... }
-event: end          data: {}</code></pre>
-  <div class="box box-purple" style="font-size:0.6em;margin-top:8px">
-    <strong>Front-end uses:</strong> <span class="mono">event === "messages/partial"</span> — typed event name in SSE header, not a field inside data.
-    Compatible with the official <span class="mono">@langchain/langgraph-sdk</span>.
-  </div>
+# 2. Set your credentials
+cp .env.example .env
+# edit .env: add LLM_GATEWAY_API_KEY
+
+# 3. Start both servers
+bash run.sh
+
+# Servers now at:
+# http://localhost:8000  (FastAPI)
+# http://localhost:8001  (Aegra)</code></pre>
+        </div>
+      </div>
+      <div>
+        <div class="box box-blue">
+          <strong style="color:#93c5fd">Call the agent from your own code</strong>
+          <pre style="margin-top:8px"><code class="python"># Direct Python import — no HTTP needed
+from agents.deep_agent import DEEP_AGENT
+
+result = DEEP_AGENT.invoke(
+    {"messages": [{"role": "user",
+        "content": "Analyze data.csv and summarise trends"}]},
+    config={"configurable": {
+        "thread_id": "my-session-01"
+    }},
+)
+
+# Or stream token-by-token:
+for event in DEEP_AGENT.astream_events(
+    {"messages": [...]},
+    config={"configurable": {"thread_id": "s01"}},
+    version="v2",
+):
+    if event["event"] == "on_chat_model_stream":
+        print(event["data"]["chunk"].content, end="")</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10b — HTTP / curl -->
+  <section>
+    <h2>Using Deep Agents via HTTP</h2>
+    <div class="two-col" style="font-size:0.63em">
+      <div>
+        <div class="box box-blue">
+          <strong style="color:#93c5fd">FastAPI (port 8000) — raw SSE</strong>
+          <pre style="margin-top:8px"><code class="bash"># Stream a task — watch tokens arrive live
+curl -N -X POST http://localhost:8000/api/deep/stream \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Analyze sales=120, users=80, churn=5%",
+    "thread_id": "dev-session-1"
+  }'
+
+# Resume after HITL interrupt
+curl -X POST http://localhost:8000/api/resume/dev-session-1 \
+  -H "Content-Type: application/json" \
+  -d '{"choice": "Full report"}'
+
+# Inspect VFS after run
+curl http://localhost:8000/api/threads/dev-session-1/vfs</code></pre>
+        </div>
+      </div>
+      <div>
+        <div class="box box-purple">
+          <strong style="color:#c4b5fd">Aegra (port 8001) — Platform API</strong>
+          <pre style="margin-top:8px"><code class="bash"># 1. Create a thread
+THREAD=$(curl -s -X POST http://localhost:8001/threads \
+  -H "Content-Type: application/json" -d '{}' \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['thread_id'])")
+
+# 2. Stream a run
+curl -N -X POST http://localhost:8001/threads/$THREAD/runs/stream \
+  -H "Content-Type: application/json" \
+  -d '{
+    "assistant_id": "deep",
+    "input": {"messages": [
+      {"role": "user", "content": "Write a Python sort function"}
+    ]}
+  }'
+
+# 3. Inspect state after run
+curl http://localhost:8001/threads/$THREAD/state</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="box box-yellow" style="font-size:0.6em;margin-top:6px">
+      Both servers serve the same LangGraph agents. Use FastAPI for quick scripting; Aegra when you need the SDK or platform integration.
+    </div>
+  </section>
+
+  <!-- 10c — running in a notebook or CI -->
+  <section>
+    <h2>Deep Agent in a Notebook or CI Pipeline</h2>
+    <pre><code class="python"># Works in Jupyter, VS Code notebook, or a CI script
+import asyncio
+from agents.deep_agent import DEEP_AGENT
+from agents.config import make_llm  # uses LLM gateway automatically
+
+thread = "notebook-demo-01"
+config = {"configurable": {"thread_id": thread}}
+
+# ── Run and collect ─────────────────────────────────────────────
+tokens = []
+tool_calls = []
+
+async def run():
+    async for event in DEEP_AGENT.astream_events(
+        {"messages": [{"role": "user",
+            "content": "Write a Python function to parse a CSV and compute averages"}]},
+        config=config,
+        version="v2",
+    ):
+        if event["event"] == "on_chat_model_stream":
+            tokens.append(event["data"]["chunk"].content)
+        elif event["event"] == "on_tool_end":
+            tool_calls.append(event["name"])
+
+asyncio.run(run())
+
+print("".join(tokens))          # final answer
+print("Tools used:", tool_calls)
+
+# ── Read VFS output ─────────────────────────────────────────────
+from agents.deep_agent import get_vfs
+print(get_vfs(thread))          # {"solution.py": "def parse_csv(..."})</code></pre>
+    <div class="small center" style="margin-top:6px">No server needed. Import and run directly. Same pattern for automated testing of agent behaviour.</div>
+  </section>
+
 </section>
 
-<!-- ── 10. Comparison Table ───────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     11. FASTAPI vs AEGRA
+═══════════════════════════════════════════════════════════════════ -->
 <section>
   <h2>FastAPI vs Aegra — Side by Side</h2>
   <table class="vs-table">
@@ -341,79 +867,197 @@ event: end          data: {}</code></pre>
     <tbody>
       <tr><td>API contract</td><td>Ad-hoc, self-defined</td><td>LangGraph Platform spec (open)</td></tr>
       <tr><td>SSE event schema</td><td><code>data.type = "token"</code></td><td><code>event: messages/partial</code></td></tr>
-      <tr><td>Thread management</td><td>Manual / roll-your-own</td><td><code>POST /threads</code> built-in</td></tr>
+      <tr><td>Thread management</td><td>Manual</td><td><code>POST /threads</code> built-in</td></tr>
       <tr><td>State inspection</td><td>Custom endpoint needed</td><td><code>GET /threads/{id}/state</code></td></tr>
-      <tr><td>Client SDK</td><td>Raw <code>fetch</code> + manual parse</td><td><code>@langchain/langgraph-sdk</code></td></tr>
-      <tr><td>HITL resume</td><td>Custom <code>POST /api/resume/{id}</code></td><td><code>POST /threads/{id}/runs/{rid}/resume</code></td></tr>
-      <tr><td>License</td><td>Apache 2.0</td><td>Apache 2.0 (Aegra)</td></tr>
-      <tr><td>K8s deploy</td><td>Any FastAPI Dockerfile</td><td>Aegra Docker + Postgres</td></tr>
+      <tr><td>Client SDK</td><td>Raw fetch + manual parse</td><td><code>@langchain/langgraph-sdk</code></td></tr>
+      <tr><td>HITL resume</td><td>Custom endpoint</td><td><code>POST /runs/{id}/resume</code></td></tr>
       <tr><td>Time-travel debug</td><td>No</td><td>Yes (state snapshots)</td></tr>
-      <tr><td>LangFlow compat</td><td>Custom node needed</td><td>Wrap SDK client as component</td></tr>
+      <tr><td>K8s deploy</td><td>Any FastAPI Dockerfile</td><td>Aegra Docker + Postgres</td></tr>
+      <tr><td>License</td><td>Apache 2.0</td><td>Apache 2.0 (Aegra)</td></tr>
     </tbody>
   </table>
 </section>
 
-<!-- ── 11. React GUI ──────────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     12. PLATFORM INTEGRATION
+═══════════════════════════════════════════════════════════════════ -->
 <section>
-  <h2>7 — React GUI: What it Handles</h2>
-  <div class="ascii">
-┌──────────────────────────────────────────────────────────┐
-│  DeepAgent Demo  [Simple|Deep]  [FastAPI|Aegra]          │
-├───────────────────────────┬──────────────────────────────┤
-│  Chat Stream              │  Side Panel                  │
-│                           │  ┌─ Plan / Todos ──────────┐ │
-│  [User]: Write a report   │  │ □ Analyze data          │ │
-│  ⚙ write_todos calling... │  │ □ Write Python code     │ │
-│  ✓ write_todos done       │  │ □ Save to VFS           │ │
-│  [AI]: Here's my plan...  │  └─────────────────────────┘ │
-│  ⚙ analyze_data calling.. │  ┌─ VFS Files ─────────────┐ │
-│  ✓ analyze_data done      │  │ 📄 analysis.txt  [view] │ │
-│  ⚙ write_code calling...  │  │ 📄 report.py     [view] │ │
-│  ✓ write_code done        │  └─────────────────────────┘ │
-│  [AI]: Done! Files saved. │  ┌─ Raw Events ────────────┐ │
-│                           │  │ [tool_start] write_code │ │
-│  ┌─ HITL Modal ─────────┐ │  │ [token] Hello...        │ │
-│  │ Choose analysis type │ │  └─────────────────────────┘ │
-│  │ [A] Summary          │ │                              │
-│  │ [B] Full breakdown   │ │                              │
-│  └──────────────────────┘ │                              │
-└───────────────────────────┴──────────────────────────────┘
-  </div>
-  <p class="small center">No build step — React 18 + Tailwind CSS via CDN. Single <code>index.html</code>.</p>
+
+  <!-- 12a — overview -->
+  <section>
+    <h2>Platform Integration</h2>
+    <div class="three-col" style="font-size:0.65em;margin-top:4px">
+      <div class="box box-green" style="text-align:center">
+        <div style="font-size:1.8em">🌊</div>
+        <strong style="color:#86efac">LangFlow</strong><br/>
+        <span class="chip chip-green">✓ Native agent node</span><br/><br/>
+        Deep Agent added directly as a LangFlow component — drag and drop.
+      </div>
+      <div class="box box-blue" style="text-align:center">
+        <div style="font-size:1.8em">☁</div>
+        <strong style="color:#93c5fd">Azure AI Foundry</strong><br/>
+        <span class="chip chip-green">✓ Hosted agent</span><br/><br/>
+        Deploy as containerised Azure AI Agent — full LangGraph control.
+      </div>
+      <div class="box box-gray" style="text-align:center">
+        <div style="font-size:1.8em">🔍</div>
+        <strong style="color:#94a3b8">Glean</strong><br/>
+        <span class="chip chip-gray">⊘ Tool only — not a host</span><br/><br/>
+        Search tool <em>inside</em> the Deep Agent. Cannot host agents.
+      </div>
+    </div>
+    <p class="small center" style="margin-top:12px">↓ navigate down for details</p>
+  </section>
+
+  <!-- 12b — LangFlow -->
+  <section>
+    <h2>🌊 LangFlow — Native Agent Node</h2>
+    <div class="two-col" style="font-size:0.65em">
+      <div>
+        <div class="box box-green">
+          <strong style="color:#86efac">Deep Agent as a LangFlow component</strong><br/><br/>
+          Wrap the compiled graph in a <code>Component</code> class.
+          It appears in LangFlow's canvas as a first-class draggable block.
+          No-code users wire inputs and outputs visually.
+          Developers edit the graph internals when needed.
+        </div>
+        <div class="box box-blue" style="margin-top:8px">
+          <strong style="color:#93c5fd">LLM gateway in LangFlow</strong><br/><br/>
+          The component calls <code>make_llm()</code> internally — it reads
+          <code>LLM_GATEWAY_API_KEY</code> from the environment.
+          Set it once in LangFlow's secrets store; all agent components inherit it.
+        </div>
+      </div>
+      <div>
+        <pre><code class="python">from langflow.custom import Component
+from langflow.io import MessageTextInput, Output
+
+class DeepAgentComponent(Component):
+    display_name = "Deep Agent"
+    description  = "LangGraph Deep Agent — VFS + Skills + HITL"
+
+    inputs = [
+        MessageTextInput(
+            name="message",
+            display_name="User Message"
+        ),
+    ]
+    outputs = [
+        Output(display_name="Response",
+               name="response",
+               method="run_agent"),
+    ]
+
+    def run_agent(self) -> Message:
+        result = DEEP_AGENT.invoke(
+            {"messages": [{"role": "user",
+                           "content": self.message}]},
+            config={"configurable": {
+                "thread_id": self.session_id
+            }},
+        )
+        return Message(text=result["messages"][-1].content)</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12c — Foundry -->
+  <section>
+    <h2>☁ Azure AI Foundry — Hosted Agent</h2>
+    <div class="two-col" style="font-size:0.65em">
+      <div>
+        <div class="box box-blue">
+          <strong style="color:#93c5fd">Two paths in Foundry</strong>
+          <table style="margin-top:8px;width:100%;font-size:0.9em;border-collapse:collapse">
+            <tr>
+              <td style="padding:5px 8px;color:#fca5a5">❌ Prompt Agents</td>
+              <td style="padding:5px 8px">No custom loops, no VFS, no HITL</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 8px;color:#86efac">✅ Azure AI Agents (container)</td>
+              <td style="padding:5px 8px">Full control — your Docker image, your LangGraph</td>
+            </tr>
+          </table>
+        </div>
+        <div class="box box-yellow" style="margin-top:8px">
+          <strong style="color:#fde68a">LLM gateway in Foundry</strong><br/><br/>
+          Pass <code>LLM_GATEWAY_API_KEY</code> and
+          <code>LLM_GATEWAY_URL</code> as container environment variables
+          in the Foundry deployment config.
+          The agent code is unchanged.
+        </div>
+      </div>
+      <div>
+        <pre><code class="dockerfile"># Same image for K8s, Foundry, and local dev
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 8001
+
+# Aegra server — LangGraph Platform REST spec
+CMD ["uvicorn", "servers.aegra_server:app",
+     "--host", "0.0.0.0", "--port", "8001"]</code></pre>
+        <div class="box box-purple" style="font-size:0.85em;margin-top:8px">
+          Foundry calls <code>POST /threads/{id}/runs/stream</code> — the standard Aegra endpoint.
+          No LangSmith license. No vendor lock-in.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12d — Glean -->
+  <section>
+    <h2>🔍 Glean — Search Tool, Not Agent Host</h2>
+    <div class="two-col" style="font-size:0.66em">
+      <div>
+        <div class="box box-gray">
+          <strong style="color:#94a3b8">Why Glean can't host the Deep Agent</strong><br/><br/>
+          Glean is a <strong>search platform</strong>, not an agent runtime.
+          It has no concept of stateful graph execution, VFS, tool loops,
+          or HITL interrupts.
+          There is no Glean API for running custom LangGraph graphs.
+        </div>
+        <div class="box box-green" style="margin-top:8px">
+          <strong style="color:#86efac">What Glean provides</strong><br/><br/>
+          Glean exposes a REST search API that returns ranked document
+          snippets from your internal knowledge base.
+          The Deep Agent calls it as one tool among many — results are
+          synthesised by the LLM and written to VFS, not dumped into context.
+        </div>
+      </div>
+      <div>
+        <pre><code class="python">@tool
+def search_knowledge(query: str) -> str:
+    """Search enterprise knowledge via Glean."""
+    resp = requests.post(
+        "https://your-org.glean.com/api/rest/search",
+        headers={"Authorization": f"Bearer {GLEAN_TOKEN}"},
+        json={"query": query, "pageSize": 5},
+    )
+    hits  = resp.json().get("results", [])
+    docs  = "\n\n".join(
+        h["document"]["title"] + "\n" + h["snippets"][0]["text"]
+        for h in hits
+    )
+    # Synthesise with general LLM from gateway
+    return make_llm(MODEL_GENERAL).invoke(
+        f"Answer based on:\n{docs}\n\nQuestion: {query}"
+    ).content</code></pre>
+        <div class="small">Glean = enterprise search index. Deep Agent = reasoning engine on top.</div>
+      </div>
+    </div>
+  </section>
+
 </section>
 
-<!-- ── 12. Platform Strategy ─────────────────────────────────────────────────── -->
-<section>
-  <h2>8 — Platform Strategy</h2>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:0.65em">
-    <div class="box box-blue">
-      <div style="font-weight:bold;color:#93c5fd;margin-bottom:6px">🔍 Glean</div>
-      Wrap as a <strong>System Tool</strong> inside the Deep Agent.
-      <code>search_knowledge()</code> calls Glean API, LLM synthesizes answer.
-      Keeps context window clean via VFS.
-    </div>
-    <div class="box box-purple">
-      <div style="font-weight:bold;color:#c4b5fd;margin-bottom:6px">🌊 LangFlow</div>
-      Create a <strong>Custom Component</strong> wrapping the LangGraph SDK client.
-      Low-code users drag one "Agent" node; pro-code edit graph internals.
-    </div>
-    <div class="box box-green">
-      <div style="font-weight:bold;color:#86efac;margin-bottom:6px">☸ Kubernetes</div>
-      <strong>Aegra</strong> = FastAPI + Postgres. Runs in any K8s cluster.
-      No LangSmith license needed. Standard <code>Dockerfile</code> + Helm chart.
-    </div>
-    <div class="box box-yellow">
-      <div style="font-weight:bold;color:#fde68a;margin-bottom:6px">☁ Azure Foundry</div>
-      Skip "Prompt Agents" (too limited). Use <strong>Azure Hosted Agents</strong>
-      (Docker) or K8s + Aegra path for full polymorphic control.
-    </div>
-  </div>
-</section>
-
-<!-- ── 13. Demo ───────────────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     13. DEMO
+═══════════════════════════════════════════════════════════════════ -->
 <section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
   <h2>Live Demo</h2>
-  <div class="two-col" style="font-size:0.7em;margin-top:8px">
+  <div class="two-col" style="font-size:0.68em;margin-top:8px">
     <div class="box box-blue">
       <strong>FastAPI server</strong> — port 8000<br/>
       <span class="mono">POST /api/deep/stream</span><br/>
@@ -425,41 +1069,44 @@ event: end          data: {}</code></pre>
       Typed SSE <code>event:</code> names
     </div>
   </div>
-  <div style="margin-top:20px;font-size:0.68em">
-    <div style="margin-bottom:6px"><strong style="color:#86efac">Demo 1 — Simple Agent:</strong><br/>
-      "Write name=Alice, role=engineer to the data store then read it back"
+  <div style="margin-top:16px;font-size:0.65em">
+    <div style="margin-bottom:8px"><strong class="hl-green">Demo 1 — Simple Agent:</strong><br/>
+      "Write name=Alice, role=engineer to the store then read it back"
     </div>
-    <div style="margin-bottom:6px"><strong style="color:#93c5fd">Demo 2 — Deep Agent (skills):</strong><br/>
-      "Analyze this dataset: [10,25,15,30] — save findings and write Python to plot it"
+    <div style="margin-bottom:8px"><strong class="hl-blue">Demo 2 — Deep Agent (VFS + skills):</strong><br/>
+      "Analyze dataset: [10,25,15,30] — save findings and write Python to plot it"
     </div>
-    <div><strong style="color:#fde68a">Demo 3 — HITL:</strong><br/>
+    <div><strong class="hl-yellow">Demo 3 — HITL:</strong><br/>
       "Search for sales info, then ask me how detailed the report should be"
     </div>
   </div>
-  <div style="margin-top:20px">
-    <a href="/" style="color:#8b5cf6;font-size:0.6em">→ Open GUI at localhost:8000</a>
-  </div>
 </section>
 
-<!-- ── 14. Summary ────────────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════
+     14. SUMMARY
+═══════════════════════════════════════════════════════════════════ -->
 <section>
   <h2>Summary</h2>
-  <div style="font-size:0.7em">
-    <div class="box box-purple" style="margin-bottom:10px">
-      <strong>Deep Agent = LangGraph + opinionated body</strong><br/>
-      VFS (offload artifacts), write_todos (planning), skills (specialized LLMs), HITL (interrupts)
+  <div style="font-size:0.65em">
+    <div class="box box-red" style="margin-bottom:8px">
+      <strong>OpenCode → Deep Agent:</strong>
+      same LLM gateway credentials, new orchestration layer — persistent state, visible planning, VFS, specialised models, HITL, platform-deployable.
     </div>
-    <div class="box box-blue" style="margin-bottom:10px">
-      <strong>FastAPI → Aegra migration path</strong><br/>
-      Start raw, grow into the Platform API as teams scale. Same LangGraph code, different host.
+    <div class="box box-purple" style="margin-bottom:8px">
+      <strong>VFS is the key enabler:</strong>
+      files never enter the context window — only paths do. Agents stay sharp across arbitrarily long tasks.
     </div>
-    <div class="box box-green" style="margin-bottom:10px">
-      <strong>React GUI pattern</strong><br/>
-      Token streaming + tool spinners + VFS panel + HITL modal. FastAPI needs raw fetch; Aegra can use the SDK.
+    <div class="box box-green" style="margin-bottom:8px">
+      <strong>Skills bus:</strong>
+      one <code>make_llm(model)</code> call in <code>config.py</code> controls every skill. Swap models or gateway without touching agent logic.
+    </div>
+    <div class="box box-blue" style="margin-bottom:8px">
+      <strong>FastAPI → Aegra migration path:</strong>
+      start raw, grow into the Platform API. Same agent code. SDK compatibility + LangFlow + Foundry unlocks.
     </div>
     <div class="box box-yellow">
-      <strong>No vendor lock-in</strong><br/>
-      Ollama (local), Aegra (Apache 2.0), LangGraph (MIT), FastAPI (MIT). K8s-native.
+      <strong>No vendor lock-in:</strong>
+      LangGraph (MIT) · Aegra (Apache 2.0) · FastAPI (MIT) · K8s-native · your LLM gateway, your models.
     </div>
   </div>
 </section>
@@ -467,6 +1114,7 @@ event: end          data: {}</code></pre>
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/highlight/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/notes/notes.min.js"></script>
 <script>
