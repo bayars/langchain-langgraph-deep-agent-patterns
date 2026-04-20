@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>SSE Diagnostic</title>
+  <style>
+    body { background:#0d1117; color:#e6edf3; font-family:monospace; padding:20px; }
+    button { background:#21262d; color:#58a6ff; border:1px solid #30363d;
+             padding:8px 16px; border-radius:6px; cursor:pointer; margin:4px; font-size:13px; }
+    button:hover { background:#30363d; }
+    #out { margin-top:16px; background:#161b22; border:1px solid #30363d;
+           padding:12px; border-radius:8px; white-space:pre-wrap;
+           font-size:12px; min-height:200px; line-height:1.6; }
+    .tok  { color:#bc8cff; }
+    .tool { color:#3fb950; }
+    .evt  { color:#d29922; }
+    .err  { color:#f85149; }
+    .inf  { color:#8b949e; }
+  </style>
+</head>
+<body>
+<h3>SSE Diagnostic — no React, no Babel</h3>
+<div>
+  <button onclick="runTest('http://10.0.0.172:8000/api/test/stream','GET',null,'fastapi')">
+    FastAPI · Test SSE (port 8000)
+  </button>
+  <button onclick="runTest('http://10.0.0.172:8001/api/test/stream','GET',null,'aegra')">
+    Aegra · Test SSE (port 8001)
+  </button>
+  <button onclick="clearOut()">Clear</button>
+</div>
+<div>
+  <button onclick="runSimple()">Simple Agent (FastAPI, needs Ollama)</button>
+  <button onclick="runDeep()">Deep Agent (FastAPI, needs Ollama)</button>
+</div>
+<div id="out">Click a button to start…</div>
+
+<script>
+var out = document.getElementById('out');
+
+function clearOut() { out.innerHTML = ''; }
+
+function log(cls, text) {
+  var s = document.createElement('span');
+  s.className = cls;
+  s.textContent = text;
+  out.appendChild(s);
+  out.scrollTop = out.scrollHeight;
+}
+
+function runTest(url, method, body, mode) {
+  clearOut();
+  log('inf', '[' + mode + '] connecting to ' + url + '\n');
+
+  var xhr = new XMLHttpRequest();
+  xhr.open(method, url, true);
+  if (body) xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.timeout = 300000;
+
+  var lastPos = 0;
+  var buffer  = '';
+
+  xhr.onprogress = function() {
+    var chunk = xhr.responseText.slice(lastPos);
+    lastPos   = xhr.responseText.length;
+    if (!chunk) return;
+
+    buffer += chunk;
+    var blocks = buffer.split('\n\n');
+    buffer = blocks.pop() || '';
+
+    for (var i = 0; i < blocks.length; i++) {
+      var block = blocks[i];
+      if (!block.trim() || block.trimStart().charAt(0) === ':') {
+        log('inf', '[ping]\n');
+        continue;
+      }
+      var evName  = 'message';
+      var dataStr = null;
+      var lines   = block.split('\n');
+      for (var j = 0; j < lines.length; j++) {
+        if (lines[j].indexOf('event: ') === 0) evName  = lines[j].slice(7).trim();
+        if (lines[j].indexOf('data: ')  === 0) dataStr = lines[j].slice(6);
+      }
+      if (dataStr === null) continue;
+
+      var parsed;
+      try { parsed = JSON.parse(dataStr); } catch(e) { parsed = {raw: dataStr}; }
+
+      var t = (parsed && parsed.type) || evName;
+      if (t === 'token' || evName === 'messages/partial') {
+        log('tok', parsed.content || '');
+      } else if (t === 'tool_start' || evName === 'tool_start') {
+        log('tool', '\n[tool: ' + (parsed.tool || '?') + ' → start]\n');
+      } else if (t === 'tool_end' || evName === 'tool_end') {
+        log('tool', '[tool: ' + (parsed.tool || '?') + ' → done: ' + (parsed.output || '') + ']\n');
+      } else if (t === 'done' || evName === 'end') {
+        log('inf', '\n[DONE]\n');
+      } else {
+        log('evt', '\n[' + evName + '] ' + JSON.stringify(parsed).slice(0, 120) + '\n');
+      }
+    }
+  };
+
+  xhr.onload    = function() { log('inf', '\n[stream closed, status=' + xhr.status + ']\n'); };
+  xhr.onerror   = function() { log('err', '\n[XHR ERROR — check CORS / server]\n'); };
+  xhr.ontimeout = function() { log('err', '\n[XHR TIMEOUT]\n'); };
+
+  xhr.send(body || null);
+}
+
+function runSimple() {
+  clearOut();
+  log('inf', '[simple agent] sending to FastAPI port 8000…\n');
+  runTest(
+    'http://10.0.0.172:8000/api/simple/stream', 'POST',
+    JSON.stringify({message:'Write key=hello value=world to the data store, then read it back.', thread_id:'diag1'}),
+    'fastapi'
+  );
+}
+
+function runDeep() {
+  clearOut();
+  log('inf', '[deep agent] sending to FastAPI port 8000…\n');
+  runTest(
+    'http://10.0.0.172:8000/api/deep/stream', 'POST',
+    JSON.stringify({message:'Analyze this data: sales=120, users=80, churn=5%. Save findings to report.txt', thread_id:'diag2'}),
+    'fastapi'
+  );
+}
+</script>
+</body>
+</html>

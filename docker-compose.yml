@@ -1,0 +1,50 @@
+version: "3.9"
+
+# Both services share the same image and codebase.
+# The key difference is the server module and port.
+#
+#   fastapi-server  (port 8000): raw SSE, ad-hoc event schema
+#   aegra-server    (port 8001): LangGraph Platform REST API spec
+
+services:
+  fastapi-server:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    command: >
+      uvicorn servers.fastapi_server:app
+        --host 0.0.0.0
+        --port 8000
+        --reload
+    volumes:
+      - .:/app
+    networks:
+      - agent-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  aegra-server:
+    build: .
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    command: >
+      uvicorn servers.aegra_server:app
+        --host 0.0.0.0
+        --port 8001
+        --reload
+    volumes:
+      - .:/app
+    networks:
+      - agent-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  agent-net:
+    driver: bridge

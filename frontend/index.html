@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeepAgent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --s1:        #161b22;
+      --s2:        #21262d;
+      --s3:        #30363d;
+      --border:    #30363d;
+      --border-dim: rgba(48,54,61,0.6);
+      --blue:      #58a6ff;
+      --blue-dim:  rgba(88,166,255,0.12);
+      --blue-glow: rgba(88,166,255,0.25);
+      --purple:    #bc8cff;
+      --purple-dim: rgba(188,140,255,0.1);
+      --purple-glow: rgba(188,140,255,0.22);
+      --green:     #3fb950;
+      --green-dim: rgba(63,185,80,0.12);
+      --yellow:    #d29922;
+      --yellow-dim: rgba(210,153,34,0.12);
+      --red:       #f85149;
+      --red-dim:   rgba(248,81,73,0.1);
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --subtle:    #484f58;
+      --font:      'Outfit', sans-serif;
+      --mono:      'JetBrains Mono', monospace;
+    }
+
+    html, body, #root {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(88,166,255,0.03) 0%, transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(188,140,255,0.03) 0%, transparent 50%),
+        radial-gradient(rgba(48,54,61,0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    .app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
+      height: 54px;
+      background: var(--s1);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, #1e3a5f, #2d1b4e);
+      border: 1px solid rgba(88,166,255,0.3);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .brand-name {
+      font-size: 15px; font-weight: 600; letter-spacing: -0.3px; color: var(--text);
+    }
+    .brand-badge {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+      padding: 2px 7px; border-radius: 4px;
+      text-transform: uppercase;
+      transition: all 0.3s;
+    }
+    .brand-badge--fastapi { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(88,166,255,0.2); }
+    .brand-badge--aegra   { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(188,140,255,0.2); }
+
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      transition: all 0.3s;
+    }
+    .status-dot--idle    { background: var(--subtle); }
+    .status-dot--running { background: var(--green); animation: dotPulse 1.2s ease-in-out infinite; }
+    @keyframes dotPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(63,185,80,0.5); }
+      50%     { box-shadow: 0 0 0 5px rgba(63,185,80,0); }
+    }
+
+    .controls { display: flex; align-items: center; gap: 8px; }
+
+    /* ── Pill segmented control ─────────────────────────────── */
+    .pill {
+      position: relative;
+      display: flex;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 0;
+    }
+    .pill__thumb {
+      position: absolute;
+      top: 3px; bottom: 3px;
+      background: var(--s3);
+      border-radius: 5px;
+      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1), width 0.22s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+    .pill__btn {
+      position: relative; z-index: 1;
+      background: transparent; border: none; cursor: pointer;
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      padding: 5px 13px; border-radius: 5px;
+      color: var(--muted);
+      transition: color 0.15s;
+      white-space: nowrap;
+    }
+    .pill__btn--active { color: var(--text); }
+
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--subtle); font-family: var(--font); font-size: 12px;
+      padding: 5px 11px; border-radius: 7px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-ghost:hover { border-color: var(--muted); color: var(--muted); }
+
+    /* ── Mode bar ───────────────────────────────────────────── */
+    .mode-bar {
+      padding: 7px 20px;
+      font-size: 11.5px; font-family: var(--mono);
+      color: var(--subtle);
+      border-bottom: 1px solid var(--border-dim);
+      background: var(--bg);
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .mode-bar span { color: var(--muted); }
+    .mode-bar code {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-dim);
+      padding: 1px 6px; border-radius: 4px; font-size: 11px;
+    }
+    .mode-bar code.hl { color: var(--yellow); }
+
+    /* ── Workspace ──────────────────────────────────────────── */
+    .workspace {
+      display: flex; flex: 1; overflow: hidden;
+    }
+
+    /* ── Chat ───────────────────────────────────────────────── */
+    .chat {
+      display: flex; flex-direction: column; flex: 1; overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    .chat__messages {
+      flex: 1; overflow-y: auto; padding: 20px 24px;
+      display: flex; flex-direction: column; gap: 4px;
+      scrollbar-width: thin; scrollbar-color: var(--s3) transparent;
+    }
+    .chat__messages::-webkit-scrollbar { width: 4px; }
+    .chat__messages::-webkit-scrollbar-thumb { background: var(--s3); border-radius: 2px; }
+
+    .empty-state {
+      margin: auto;
+      text-align: center;
+      padding: 40px 20px;
+      max-width: 380px;
+    }
+    .empty-state__icon {
+      font-size: 40px; margin-bottom: 16px;
+      filter: grayscale(0.3) opacity(0.7);
+    }
+    .empty-state__title {
+      font-size: 15px; font-weight: 600; color: var(--muted); margin-bottom: 8px;
+    }
+    .empty-state__hints {
+      display: flex; flex-direction: column; gap: 6px; text-align: left; margin-top: 16px;
+    }
+    .hint {
+      font-size: 12px; color: var(--subtle); padding: 8px 12px;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border-dim);
+      border-radius: 8px; line-height: 1.5;
+    }
+    .hint strong { color: var(--muted); }
+
+    /* ── Messages ───────────────────────────────────────────── */
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.985); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .msg { animation: msgIn 0.2s cubic-bezier(0.2,0,0,1); }
+
+    /* User */
+    .msg--user {
+      align-self: flex-end;
+      max-width: 72%;
+      background: linear-gradient(135deg, #1c2d4f 0%, #162034 100%);
+      border: 1px solid rgba(88,166,255,0.18);
+      border-radius: 18px 4px 18px 18px;
+      padding: 10px 15px;
+      position: relative;
+    }
+    .msg--user .msg__label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+      color: var(--blue); text-transform: uppercase; margin-bottom: 5px;
+      opacity: 0.7;
+    }
+    .msg--user .msg__body { font-size: 13.5px; line-height: 1.55; color: var(--text); }
+
+    /* AI */
+    .msg--ai {
+      align-self: flex-start;
+      max-width: 82%;
+      background: linear-gradient(135deg, #161225 0%, #100e1c 100%);
+      border: 1px solid rgba(188,140,255,0.14);
+      border-radius: 4px 18px 18px 18px;
+      padding: 10px 15px;
+      position: relative;
+      box-shadow: -3px 0 0 rgba(188,140,255,0.35);
+    }
+    .msg--ai.msg--streaming {
+      animation: msgIn 0.2s cubic-bezier(0.2,0,0,1), aiGlow 2s ease-in-out 0.2s infinite;
+    }
+    @keyframes aiGlow {
+      0%,100% { box-shadow: -3px 0 0 rgba(188,140,255,0.35), 0 0 20px rgba(188,140,255,0.04); }
+      50%      { box-shadow: -3px 0 0 rgba(188,140,255,0.6), 0 0 30px rgba(188,140,255,0.1); }
+    }
+    .msg--ai .msg__label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+      color: var(--purple); text-transform: uppercase; margin-bottom: 5px;
+      opacity: 0.7;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .msg--ai .msg__body { font-size: 13.5px; line-height: 1.65; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+
+    .caret {
+      display: inline-block; width: 2px; height: 13px;
+      background: var(--purple); margin-left: 1px; vertical-align: text-bottom;
+      border-radius: 1px; animation: caretBlink 0.9s ease-in-out infinite;
+    }
+    @keyframes caretBlink {
+      0%,45%  { opacity: 1; }
+      55%,100% { opacity: 0; }
+    }
+
+    /* Tool */
+    .msg--tool {
+      align-self: stretch;
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 7px 10px;
+      background: rgba(255,255,255,0.015);
+      border: 1px solid var(--border-dim);
+      border-left: 2px solid;
+      border-radius: 6px;
+      font-family: var(--mono); font-size: 11.5px;
+    }
+    .msg--tool.msg--tool-start { border-left-color: var(--yellow); }
+    .msg--tool.msg--tool-end   { border-left-color: var(--green); }
+    .tool-icon { font-size: 13px; flex-shrink: 0; line-height: 1.4; }
+    .tool-info { flex: 1; min-width: 0; }
+    .tool-name {
+      font-weight: 500; font-size: 11.5px;
+      color: var(--text);
+    }
+    .tool-phase {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.3px;
+      margin-left: 6px;
+    }
+    .tool-phase--start { color: var(--yellow); }
+    .tool-phase--end   { color: var(--green); }
+    .tool-content {
+      font-size: 10.5px; color: var(--subtle); margin-top: 2px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      max-width: 600px;
+    }
+
+    /* Error */
+    .msg--error {
+      align-self: stretch;
+      background: var(--red-dim);
+      border: 1px solid rgba(248,81,73,0.2);
+      border-left: 2px solid var(--red);
+      border-radius: 6px; padding: 8px 12px;
+    }
+    .msg--error .msg__label { font-size: 10px; font-weight: 600; color: var(--red); margin-bottom: 4px; }
+    .msg--error .msg__body { font-size: 12.5px; font-family: var(--mono); color: var(--muted); white-space: pre-wrap; }
+
+    /* System */
+    .msg--system {
+      align-self: center;
+      font-size: 11.5px; font-family: var(--mono);
+      color: var(--subtle); padding: 4px 12px;
+      background: var(--yellow-dim); border: 1px solid rgba(210,153,34,0.15);
+      border-radius: 99px;
+    }
+
+    /* Typing */
+    .typing {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 4px; color: var(--purple); font-size: 12px; font-weight: 500;
+    }
+    .spinner {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid rgba(188,140,255,0.2);
+      border-top-color: var(--purple);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Chat Input ─────────────────────────────────────────── */
+    .chat__input-area {
+      padding: 12px 20px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--s1);
+      flex-shrink: 0;
+    }
+    .input-row { display: flex; gap: 10px; align-items: flex-end; }
+    .textarea-wrap {
+      flex: 1; position: relative;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      overflow: hidden;
+    }
+    .textarea-wrap:focus-within {
+      border-color: rgba(188,140,255,0.45);
+      box-shadow: 0 0 0 3px rgba(188,140,255,0.08);
+    }
+    .chat-textarea {
+      width: 100%; background: transparent; border: none; outline: none; resize: none;
+      font-family: var(--font); font-size: 13.5px; line-height: 1.55;
+      color: var(--text); padding: 11px 14px;
+      display: block;
+    }
+    .chat-textarea::placeholder { color: var(--subtle); }
+    .chat-textarea:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .send-btn {
+      height: 40px; padding: 0 20px;
+      background: linear-gradient(135deg, #1a4a8a, #1a3068);
+      border: 1px solid rgba(88,166,255,0.3);
+      border-radius: 10px; cursor: pointer;
+      font-family: var(--font); font-size: 13px; font-weight: 600;
+      color: var(--blue); transition: all 0.15s;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .send-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #1e5aa0, #1e3a7a);
+      box-shadow: 0 0 16px rgba(88,166,255,0.15);
+    }
+    .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .input-meta {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 7px; font-size: 11px; font-family: var(--mono); color: var(--subtle);
+    }
+    .meta-chip {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border-dim);
+      border-radius: 4px; padding: 1px 7px; font-size: 10.5px;
+    }
+
+    /* ── Inspector ──────────────────────────────────────────── */
+    .inspector {
+      width: 296px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      background: var(--s1);
+      overflow: hidden;
+    }
+
+    .inspector__tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    .itab {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+      padding: 10px 4px;
+      background: transparent; border: none; cursor: pointer;
+      font-family: var(--font); font-size: 11px; font-weight: 500; letter-spacing: 0.2px;
+      color: var(--subtle); transition: color 0.15s;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .itab:hover { color: var(--muted); }
+    .itab--active { color: var(--text); border-bottom-color: var(--purple); }
+    .itab-icon { font-size: 13px; line-height: 1; }
+
+    .inspector__body {
+      flex: 1; overflow-y: auto; padding: 12px;
+      scrollbar-width: thin; scrollbar-color: var(--s3) transparent;
+    }
+    .inspector__body::-webkit-scrollbar { width: 3px; }
+    .inspector__body::-webkit-scrollbar-thumb { background: var(--s3); border-radius: 2px; }
+
+    .panel-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--subtle); margin-bottom: 10px; padding-left: 2px;
+    }
+    .empty-panel { font-size: 12px; color: var(--subtle); font-style: italic; padding: 4px 2px; }
+
+    /* Todos */
+    .todo-list { display: flex; flex-direction: column; gap: 4px; }
+    .todo-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 7px 10px;
+      background: var(--s2); border: 1px solid var(--border-dim);
+      border-radius: 7px; font-size: 12px;
+    }
+    .todo-check { color: var(--subtle); margin-top: 1px; flex-shrink: 0; font-size: 11px; }
+    .todo-text { color: var(--muted); line-height: 1.45; }
+
+    /* VFS */
+    .vfs-list { display: flex; flex-direction: column; gap: 4px; }
+    .vfs-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 10px;
+      background: var(--s2); border: 1px solid var(--border-dim);
+      border-radius: 7px;
+      transition: border-color 0.15s, background 0.15s;
+      cursor: pointer;
+    }
+    .vfs-item:hover { background: var(--s3); border-color: var(--border); }
+    .vfs-item-left { display: flex; align-items: center; gap: 7px; min-width: 0; }
+    .vfs-icon { font-size: 13px; flex-shrink: 0; }
+    .vfs-name { font-family: var(--mono); font-size: 11.5px; color: var(--green); truncate: true;
+                overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .vfs-size { font-size: 10px; color: var(--subtle); font-family: var(--mono); }
+    .vfs-view { font-size: 10.5px; color: var(--blue); flex-shrink: 0;
+                background: transparent; border: none; cursor: pointer;
+                font-family: var(--font); padding: 2px 6px;
+                border-radius: 4px; transition: background 0.15s; }
+    .vfs-view:hover { background: var(--blue-dim); }
+
+    /* Events */
+    .evt-list { display: flex; flex-direction: column; gap: 2px; }
+    .evt-row {
+      display: flex; align-items: baseline; gap: 6px;
+      padding: 3px 6px; border-radius: 4px;
+      font-family: var(--mono); font-size: 10.5px;
+      transition: background 0.1s;
+    }
+    .evt-row:hover { background: rgba(255,255,255,0.02); }
+    .evt-name {
+      font-weight: 500; flex-shrink: 0;
+      padding: 0px 5px; border-radius: 3px; font-size: 10px;
+    }
+    .evt-token    { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .evt-partial  { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .evt-tool_s   { background: rgba(210,153,34,0.15); color: var(--yellow); }
+    .evt-tool_e   { background: rgba(63,185,80,0.15); color: var(--green); }
+    .evt-interrupt{ background: rgba(248,81,73,0.15); color: var(--red); }
+    .evt-error    { background: rgba(248,81,73,0.2); color: var(--red); }
+    .evt-end      { background: rgba(88,166,255,0.12); color: var(--blue); }
+    .evt-done     { background: rgba(88,166,255,0.12); color: var(--blue); }
+    .evt-meta     { background: rgba(255,255,255,0.05); color: var(--subtle); }
+    .evt-other    { background: rgba(255,255,255,0.04); color: var(--subtle); }
+    .evt-data { color: var(--subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+
+    /* ── Modals ─────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.15s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+    .hitl-card {
+      background: rgba(22,27,34,0.97);
+      border: 1px solid rgba(188,140,255,0.25);
+      border-radius: 16px; padding: 28px;
+      width: 400px; max-width: calc(100vw - 40px);
+      box-shadow: 0 0 0 1px rgba(188,140,255,0.06),
+                  0 24px 80px rgba(0,0,0,0.8),
+                  0 0 60px rgba(188,140,255,0.06);
+      animation: cardIn 0.2s cubic-bezier(0.2,0,0,1);
+    }
+    @keyframes cardIn {
+      from { opacity:0; transform: scale(0.95) translateY(8px); }
+      to   { opacity:1; transform: scale(1) translateY(0); }
+    }
+    .hitl-eyebrow {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+      color: var(--purple); text-transform: uppercase; margin-bottom: 14px;
+    }
+    .hitl-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--purple);
+      animation: dotPulse 1.2s ease-in-out infinite;
+    }
+    .hitl-q {
+      font-size: 15px; font-weight: 500; color: var(--text);
+      line-height: 1.5; margin-bottom: 18px;
+    }
+    .hitl-options { display: flex; flex-direction: column; gap: 6px; }
+    .hitl-opt {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 9px; cursor: pointer;
+      font-family: var(--font); font-size: 13px; color: var(--muted);
+      transition: all 0.15s; text-align: left; width: 100%;
+    }
+    .hitl-opt:hover { background: rgba(188,140,255,0.07); border-color: rgba(188,140,255,0.3); color: var(--text); }
+    .hitl-opt-num {
+      width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+      background: var(--s3); font-size: 11px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; color: var(--muted);
+    }
+    .hitl-skip {
+      margin-top: 6px; background: transparent; border: none; cursor: pointer;
+      font-family: var(--font); font-size: 12px; color: var(--subtle);
+      padding: 6px 14px; transition: color 0.15s; width: 100%; text-align: left;
+    }
+    .hitl-skip:hover { color: var(--muted); }
+
+    .file-card {
+      background: rgba(22,27,34,0.97);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      width: 680px; max-width: calc(100vw - 40px);
+      max-height: 80vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+      animation: cardIn 0.2s cubic-bezier(0.2,0,0,1);
+      overflow: hidden;
+    }
+    .file-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--s1);
+    }
+    .file-title {
+      font-family: var(--mono); font-size: 12.5px; color: var(--green);
+      display: flex; align-items: center; gap: 7px;
+    }
+    .file-close {
+      background: var(--s2); border: 1px solid var(--border); border-radius: 6px;
+      width: 26px; height: 26px; cursor: pointer; color: var(--muted);
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      transition: all 0.15s;
+    }
+    .file-close:hover { background: var(--s3); color: var(--text); }
+    .file-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .file-body pre {
+      font-family: var(--mono); font-size: 12px; color: var(--muted);
+      line-height: 1.65; white-space: pre-wrap; word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback } = React;
+
+const SERVERS = {
+  fastapi: { label: "FastAPI", port: 8000 },
+  aegra:   { label: "Aegra",   port: 8001 },
+};
+const base = (mode) => `http://${window.location.hostname}:${SERVERS[mode].port}`;
+
+/*
+ * streamFetch — fetch + ReadableStream SSE reader.
+ * Uses Promise.then() recursion — no async/await, no generators, no Babel issues.
+ * Normalizes \r\n → \n so sse_starlette's \r\n\r\n block separators split correctly.
+ */
+function streamFetch(url, method, body, onEvent, onDone) {
+  var headers = { "Accept": "text/event-stream" };
+  if (body) headers["Content-Type"] = "application/json";
+  var buffer  = "";
+  var decoder = new TextDecoder();
+
+  function parseText(text) {
+    buffer += text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    var blocks = buffer.split("\n\n");
+    buffer = blocks.pop() || "";
+    for (var i = 0; i < blocks.length; i++) {
+      var block = blocks[i];
+      if (!block.trim() || block.trimStart().charAt(0) === ":") continue;
+      var evName  = "message";
+      var dataStr = null;
+      var lines   = block.split("\n");
+      for (var j = 0; j < lines.length; j++) {
+        if (lines[j].indexOf("event: ") === 0) evName  = lines[j].slice(7).trim();
+        if (lines[j].indexOf("data: ")  === 0) dataStr = lines[j].slice(6);
+      }
+      if (dataStr !== null) {
+        var parsed;
+        try { parsed = JSON.parse(dataStr); } catch(e) { parsed = dataStr; }
+        onEvent(evName, parsed);
+      }
+    }
+  }
+
+  function readStream(reader) {
+    reader.read().then(function(result) {
+      if (result.done) { if (onDone) onDone(); return; }
+      parseText(decoder.decode(result.value, { stream: true }));
+      readStream(reader);
+    }).catch(function(err) {
+      console.error("[stream error]", String(err));
+      if (onDone) onDone();
+    });
+  }
+
+  fetch(url, { method: method, headers: headers, body: body || null })
+    .then(function(res) {
+      if (!res.ok || !res.body) {
+        console.error("[fetch] bad response", res.status);
+        if (onDone) onDone();
+        return;
+      }
+      readStream(res.body.getReader());
+    })
+    .catch(function(err) {
+      console.error("[fetch error]", String(err));
+      if (onDone) onDone();
+    });
+}
+
+/* ── Pill segmented control ────────────────────────────────── */
+function Pill({ options, value, onChange }) {
+  const idx  = options.findIndex(o => o.key === value);
+  const pct  = 100 / options.length;
+  return (
+    <div className="pill">
+      <div className="pill__thumb" style={{ left: 3, width: `calc(${pct}% - 3px)`, transform: `translateX(${idx * 100}%)` }} />
+      {options.map(o => (
+        <button key={o.key}
+          className={`pill__btn ${value === o.key ? "pill__btn--active" : ""}`}
+          onClick={() => onChange(o.key)}>
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ── Message ────────────────────────────────────────────────── */
+function Msg({ m }) {
+  if (m.role === "user") return (
+    <div className="msg msg--user">
+      <div className="msg__label">You</div>
+      <div className="msg__body">{m.content}</div>
+    </div>
+  );
+  if (m.role === "ai") return (
+    <div className={`msg msg--ai${m.streaming ? " msg--streaming" : ""}`}>
+      <div className="msg__label">
+        Agent {m.streaming && <span className="caret" />}
+      </div>
+      <div className="msg__body">{m.content}</div>
+    </div>
+  );
+  if (m.role === "tool") return (
+    <div className={`msg msg--tool msg--tool-${m.phase}`}>
+      <div className="tool-icon">{m.phase === "start" ? "⚙" : "✓"}</div>
+      <div className="tool-info">
+        <div>
+          <span className="tool-name">{m.toolName}</span>
+          <span className={`tool-phase tool-phase--${m.phase}`}>
+            {m.phase === "start" ? "calling" : "done"}
+          </span>
+        </div>
+        {m.content && <div className="tool-content">{m.content}</div>}
+      </div>
+    </div>
+  );
+  if (m.role === "error") return (
+    <div className="msg msg--error">
+      <div className="msg__label">Error</div>
+      <div className="msg__body">{m.content}</div>
+    </div>
+  );
+  return <div className="msg msg--system">{m.content}</div>;
+}
+
+/* ── HITL Modal ─────────────────────────────────────────────── */
+function HITLModal({ data, onChoice }) {
+  return (
+    <div className="modal-overlay">
+      <div className="hitl-card">
+        <div className="hitl-eyebrow"><div className="hitl-dot" />Human-in-the-loop</div>
+        <div className="hitl-q">{data.question}</div>
+        <div className="hitl-options">
+          {(data.options || []).map((opt, i) => (
+            <button key={i} className="hitl-opt" onClick={() => onChoice(opt)}>
+              <div className="hitl-opt-num">{i + 1}</div>
+              {opt}
+            </button>
+          ))}
+        </div>
+        <button className="hitl-skip" onClick={() => onChoice("skip")}>Skip / dismiss</button>
+      </div>
+    </div>
+  );
+}
+
+/* ── File Modal ─────────────────────────────────────────────── */
+function FileModal({ file, onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="file-card" onClick={e => e.stopPropagation()}>
+        <div className="file-header">
+          <div className="file-title">📄 {file.path}</div>
+          <button className="file-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="file-body">
+          <pre>{file.content}</pre>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── App ────────────────────────────────────────────────────── */
+function App() {
+  const [serverMode, setServerMode] = useState("fastapi");
+  const [agentType,  setAgentType]  = useState("deep");
+  const [sideTab,    setSideTab]    = useState("todos");
+  const [input,      setInput]      = useState("");
+  const [busy,       setBusy]       = useState(false);
+  const [todos,      setTodos]      = useState([]);
+  const [vfs,        setVfs]        = useState({});
+  const [hitl,       setHitl]       = useState(null);
+  const [viewFile,   setViewFile]   = useState(null);
+  const [threadId]                  = useState(() => Math.random().toString(36).slice(2, 10));
+
+  /*
+   * Messages and raw events live in refs so XHR callbacks can mutate them
+   * immediately, bypassing React 18 automatic batching which was silently
+   * dropping updates from non-React async contexts (XHR onprogress).
+   * forceRender() is called after each mutation to schedule a re-render.
+   */
+  const msgsRef      = useRef([]);
+  const rawRef       = useRef([]);
+  const [, forceRender] = React.useReducer(n => n + 1, 0);
+  const bottomRef    = useRef(null);
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); });
+
+  function pushMsg(m) {
+    msgsRef.current = [...msgsRef.current, m];
+    forceRender();
+  }
+
+  function pushRaw(ev, d) {
+    rawRef.current = [...rawRef.current.slice(-149), { ev, d }];
+    forceRender();
+  }
+
+  function appendToken(content) {
+    var ms   = msgsRef.current;
+    var last = ms[ms.length - 1];
+    if (last && last.role === "ai" && last.streaming) {
+      msgsRef.current = [...ms.slice(0, -1), { ...last, content: last.content + content }];
+    } else {
+      msgsRef.current = [...ms, { role: "ai", content: content, streaming: true }];
+    }
+    forceRender();
+  }
+
+  function finalizeAI() {
+    var ms = msgsRef.current;
+    if (ms.length && ms[ms.length - 1].streaming) {
+      msgsRef.current = [...ms.slice(0, -1), { ...ms[ms.length - 1], streaming: false }];
+      forceRender();
+    }
+  }
+
+  function runFastAPI(message) {
+    var ep = agentType === "simple" ? "/api/simple/stream" : "/api/deep/stream";
+    streamFetch(
+      base(serverMode) + ep, "POST",
+      JSON.stringify({ message: message, thread_id: threadId }),
+      function(evName, data) {
+        pushRaw(data.type || evName, data);
+        var t = data.type;
+        if      (t === "token")        appendToken(data.content || "");
+        else if (t === "tool_start") { finalizeAI(); pushMsg({ role: "tool", toolName: data.tool, phase: "start", content: JSON.stringify(data.input || {}) }); }
+        else if (t === "tool_end")     pushMsg({ role: "tool", toolName: data.tool, phase: "end", content: data.output || "" });
+        else if (t === "todos_update") setTodos(data.todos || []);
+        else if (t === "vfs_update")   setVfs(function(v) { return Object.assign({}, v, data.files || {}); });
+        else if (t === "interrupt")  { finalizeAI(); setHitl({ question: data.question, options: data.options || [] }); setBusy(false); }
+        else if (t === "error")      { finalizeAI(); pushMsg({ role: "error", content: data.message }); setBusy(false); }
+        else if (t === "done")       { finalizeAI(); setBusy(false); }
+      },
+      function() { finalizeAI(); setBusy(false); }
+    );
+  }
+
+  function runAegra(message) {
+    fetch(base(serverMode) + "/threads", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
+    }).then(function(r) { return r.json(); }).then(function(thread) {
+      var tid = thread.thread_id;
+      streamFetch(
+        base(serverMode) + "/threads/" + tid + "/runs/stream", "POST",
+        JSON.stringify({ assistant_id: agentType, input: { messages: [{ role: "user", content: message }] } }),
+        function(evName, data) {
+          pushRaw(evName, data);
+          if      (evName === "messages/partial") appendToken(data.content || "");
+          else if (evName === "tool_start") { finalizeAI(); pushMsg({ role: "tool", toolName: data.tool, phase: "start", content: JSON.stringify(data.input || {}) }); }
+          else if (evName === "tool_end")   pushMsg({ role: "tool", toolName: data.tool, phase: "end", content: data.output || "" });
+          else if (evName === "updates")    { if (data.state && data.state.todos) setTodos(data.state.todos); }
+          else if (evName === "values")     { if (data.vfs) setVfs(data.vfs); if (data.todos) setTodos(data.todos); }
+          else if (evName === "interrupt")  { finalizeAI(); setHitl({ question: (data.value && data.value.question) || "Choose:", options: (data.value && data.value.options) || [], threadId: tid, runId: data.run_id }); setBusy(false); }
+          else if (evName === "error")      { finalizeAI(); pushMsg({ role: "error", content: data.message || String(data) }); setBusy(false); }
+          else if (evName === "end")        { finalizeAI(); setBusy(false); }
+        },
+        function() { finalizeAI(); setBusy(false); }
+      );
+    }).catch(function(err) { pushMsg({ role: "error", content: String(err) }); setBusy(false); });
+  }
+
+  function send() {
+    var msg = input.trim();
+    if (!msg || busy) return;
+    setInput("");
+    pushMsg({ role: "user", content: msg });
+    setBusy(true);
+    if (serverMode === "fastapi") runFastAPI(msg);
+    else                          runAegra(msg);
+  }
+
+  function resume(choice) {
+    var h = hitl;
+    setHitl(null);
+    pushMsg({ role: "system", content: "Selected: \"" + choice + "\"" });
+    setBusy(true);
+    if (serverMode === "fastapi") {
+      fetch(base(serverMode) + "/api/resume/" + threadId, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ choice: choice }),
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        pushRaw("resume", data);
+        if (data.events) {
+          var buf = "";
+          data.events.forEach(function(ev) { if (ev.type === "token") buf += ev.content; });
+          if (buf) pushMsg({ role: "ai", content: buf, streaming: false });
+        }
+        if (data.vfs)   setVfs(function(v) { return Object.assign({}, v, data.vfs); });
+        if (data.todos) setTodos(data.todos);
+        setBusy(false);
+      }).catch(function(err) { pushMsg({ role: "error", content: String(err) }); setBusy(false); });
+    } else {
+      streamFetch(
+        base(serverMode) + "/threads/" + h.threadId + "/runs/" + h.runId + "/resume", "POST",
+        JSON.stringify({ values: choice }),
+        function(evName, data) {
+          pushRaw(evName, data);
+          if      (evName === "messages/partial") appendToken(data.content || "");
+          else if (evName === "values") { if (data.vfs) setVfs(data.vfs); if (data.todos) setTodos(data.todos); }
+          else if (evName === "end")    { finalizeAI(); setBusy(false); }
+        },
+        function() { finalizeAI(); setBusy(false); }
+      );
+    }
+  }
+
+  var onKey = function(e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
+  var clearAll = function() { msgsRef.current = []; rawRef.current = []; setTodos([]); setVfs({}); forceRender(); };
+
+  function runTest() {
+    clearAll();
+    setBusy(true);
+    pushMsg({ role: "system", content: "SSE pipeline test — no Ollama needed…" });
+    streamFetch(
+      base(serverMode) + "/api/test/stream", "GET", null,
+      function(evName, data) {
+        pushRaw(evName, data);
+        var t = data.type;
+        if      (serverMode === "fastapi" && t === "token")              appendToken(data.content || "");
+        else if (serverMode === "fastapi" && t === "tool_start")       { finalizeAI(); pushMsg({ role: "tool", toolName: data.tool, phase: "start", content: JSON.stringify(data.input || {}) }); }
+        else if (serverMode === "fastapi" && t === "tool_end")           pushMsg({ role: "tool", toolName: data.tool, phase: "end", content: data.output || "" });
+        else if (serverMode === "fastapi" && t === "done")             { finalizeAI(); setBusy(false); }
+        else if (serverMode === "aegra"   && evName === "messages/partial") appendToken(data.content || "");
+        else if (serverMode === "aegra"   && evName === "tool_start")  { finalizeAI(); pushMsg({ role: "tool", toolName: data.tool, phase: "start", content: JSON.stringify(data.input || {}) }); }
+        else if (serverMode === "aegra"   && evName === "tool_end")      pushMsg({ role: "tool", toolName: data.tool, phase: "end", content: data.output || "" });
+        else if (serverMode === "aegra"   && evName === "end")         { finalizeAI(); setBusy(false); }
+      },
+      function() { finalizeAI(); setBusy(false); }
+    );
+  }
+
+  const evtClass = ev => {
+    const map = { token:"evt-token","messages/partial":"evt-partial",tool_start:"evt-tool_s",tool_end:"evt-tool_e",interrupt:"evt-interrupt",error:"evt-error",end:"evt-end",done:"evt-done",metadata:"evt-meta" };
+    return map[ev] || "evt-other";
+  };
+
+  return (
+    <div className="app">
+      {/* ── Header ── */}
+      <header className="header">
+        <div className="brand">
+          <div className="brand-icon">🤖</div>
+          <span className="brand-name">DeepAgent</span>
+          <span className={`brand-badge brand-badge--${serverMode}`}>
+            {serverMode === "fastapi" ? "FastAPI" : "Aegra"}
+          </span>
+          <div className={`status-dot ${busy ? "status-dot--running" : "status-dot--idle"}`} title={busy ? "Running" : "Idle"} />
+        </div>
+        <div className="controls">
+          <Pill
+            options={[{key:"simple",label:"Simple"},{key:"deep",label:"Deep"}]}
+            value={agentType} onChange={setAgentType} />
+          <Pill
+            options={[{key:"fastapi",label:"FastAPI"},{key:"aegra",label:"Aegra"}]}
+            value={serverMode} onChange={setServerMode} />
+          <button className="btn-ghost" onClick={runTest} disabled={busy} style={{borderColor:"var(--green)",color:"var(--green)"}}>Test SSE</button>
+          <button className="btn-ghost" onClick={clearAll}>Clear</button>
+        </div>
+      </header>
+
+      {/* ── Mode bar ── */}
+      <div className="mode-bar">
+        {serverMode === "fastapi" ? (
+          <>
+            <span>Raw SSE</span>
+            <span style={{color:"var(--border)"}}>·</span>
+            parse <code>data.type</code> field
+            <span style={{color:"var(--border)"}}>·</span>
+            <code className="hl">POST /api/{agentType}/stream</code>
+          </>
+        ) : (
+          <>
+            <span>Platform API</span>
+            <span style={{color:"var(--border)"}}>·</span>
+            typed SSE <code>event:</code> names
+            <span style={{color:"var(--border)"}}>·</span>
+            <code className="hl">POST /threads/&#123;id&#125;/runs/stream</code>
+          </>
+        )}
+        {rawRef.current.length > 0 && (
+          <span style={{marginLeft:"auto",color:"var(--green)",fontWeight:600}}>
+            ⬡ {rawRef.current.length} events
+          </span>
+        )}
+      </div>
+
+      {/* ── Workspace ── */}
+      <div className="workspace">
+        {/* Chat */}
+        <section className="chat">
+          <div className="chat__messages">
+            {msgsRef.current.length === 0 && (
+              <div className="empty-state">
+                <div className="empty-state__icon">⬡</div>
+                <div className="empty-state__title">Agent ready</div>
+                <div className="empty-state__hints">
+                  <div className="hint"><strong>Simple:</strong> "Write name=Alice role=engineer to the data store"</div>
+                  <div className="hint"><strong>Deep:</strong> "Analyze [10,25,15,30] — save findings to report.txt"</div>
+                  <div className="hint"><strong>Code:</strong> "Write Python to sort a list, save to sort.py"</div>
+                  <div className="hint"><strong>HITL:</strong> "Search sales data then ask me how detailed the report should be"</div>
+                </div>
+              </div>
+            )}
+            {msgsRef.current.map((m, i) => <Msg key={i} m={m} />)}
+            {busy && (
+              <div className="typing">
+                <div className="spinner" />
+                Agent working…
+              </div>
+            )}
+            <div ref={bottomRef} />
+          </div>
+
+          <div className="chat__input-area">
+            <div className="input-row">
+              <div className="textarea-wrap">
+                <textarea
+                  className="chat-textarea"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={onKey}
+                  placeholder="Message the agent…  (Enter to send, Shift+Enter for newline)"
+                  rows={2}
+                  disabled={busy || !!hitl}
+                />
+              </div>
+              <button className="send-btn" onClick={send} disabled={busy || !input.trim() || !!hitl}>
+                Send
+              </button>
+            </div>
+            <div className="input-meta">
+              <span className="meta-chip">thread: {threadId}</span>
+              <span className="meta-chip">:{SERVERS[serverMode].port}</span>
+              <span className="meta-chip">{agentType}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Inspector */}
+        <aside className="inspector">
+          <nav className="inspector__tabs">
+            {[
+              ["todos",  "☰", "Plan"],
+              ["vfs",    "◫", "Files"],
+              ["events", "≡", "Events"],
+            ].map(([id, icon, label]) => (
+              <button key={id}
+                className={`itab ${sideTab === id ? "itab--active" : ""}`}
+                onClick={() => setSideTab(id)}>
+                <span className="itab-icon">{icon}</span>
+                {label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="inspector__body">
+            {sideTab === "todos" && (
+              <div>
+                <div className="panel-label">Agent Plan</div>
+                {todos.length === 0
+                  ? <div className="empty-panel">No plan yet</div>
+                  : <div className="todo-list">
+                      {todos.map((t, i) => (
+                        <div key={i} className="todo-item">
+                          <span className="todo-check">○</span>
+                          <span className="todo-text">{t}</span>
+                        </div>
+                      ))}
+                    </div>
+                }
+              </div>
+            )}
+
+            {sideTab === "vfs" && (
+              <div>
+                <div className="panel-label">Virtual File System</div>
+                {Object.keys(vfs).length === 0
+                  ? <div className="empty-panel">No files yet</div>
+                  : <div className="vfs-list">
+                      {Object.entries(vfs).map(([path, content]) => (
+                        <div key={path} className="vfs-item" onClick={() => setViewFile({ path, content })}>
+                          <div className="vfs-item-left">
+                            <span className="vfs-icon">📄</span>
+                            <span className="vfs-name">{path}</span>
+                          </div>
+                          <div style={{display:"flex",alignItems:"center",gap:8}}>
+                            <span className="vfs-size">{content.length}b</span>
+                            <button className="vfs-view" onClick={e => { e.stopPropagation(); setViewFile({ path, content }); }}>view</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                }
+              </div>
+            )}
+
+            {sideTab === "events" && (
+              <div>
+                <div className="panel-label">
+                  {serverMode === "fastapi" ? "data.type" : "event: name"}
+                </div>
+                {rawRef.current.length === 0
+                  ? <div className="empty-panel">No events yet</div>
+                  : <div className="evt-list">
+                      {rawRef.current.slice(-50).map(({ ev, d }, i) => (
+                        <div key={i} className="evt-row">
+                          <span className={`evt-name ${evtClass(ev)}`}>{ev}</span>
+                          <span className="evt-data">
+                            {typeof d === "object" ? JSON.stringify(d).slice(0, 90) : String(d).slice(0, 90)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                }
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+
+      {hitl     && <HITLModal data={hitl} onChoice={resume} />}
+      {viewFile && <FileModal file={viewFile} onClose={() => setViewFile(null)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
