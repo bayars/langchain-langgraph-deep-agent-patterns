@@ -241,28 +241,136 @@ def make_llm(model: str = MODEL_GENERAL, temperature: float = 0.1):
     </div>
   </section>
 
-  <!-- 5b — skills use it -->
+  <!-- 5b — why make_llm + skills -->
   <section>
-    <h2>Skills Use make_llm() — One Call Each</h2>
-    <p class="small">Each skill is an isolated, non-recursive LLM call. Orchestrator decides; skill executes once.</p>
-    <div class="ascii" style="font-size:0.88em;margin-bottom:10px">
-Orchestrator LLM
-  ├─ calls analyze_data(...)  → Analyst LLM  (1 call, returns string)
-  ├─ calls write_code(...)    → Coder LLM    (1 call, returns string)
-  └─ combines results → final answer to user
-    </div>
-    <div class="two-col" style="font-size:0.6em">
-      <div class="box box-purple">
-        <span class="mono">make_llm(MODEL_GENERAL)</span><br/>
-        Used by <code>analyze_data</code>, <code>search_knowledge</code> — reasoning, synthesis.
+    <h2>Why make_llm() — and Why Skills Need It</h2>
+    <div class="two-col" style="font-size:0.62em">
+      <div>
+        <div class="box box-red" style="margin-bottom:8px">
+          <strong style="color:#fca5a5">Without it — repeated boilerplate everywhere</strong>
+          <pre style="margin-top:6px"><code class="python"># skills.py — every skill duplicates this:
+@tool
+def analyze_data(data: str) -> str:
+    llm = ChatOpenAI(
+        model="general",
+        base_url="https://llm-gateway.../v1",
+        api_key=os.environ["LLM_GATEWAY_API_KEY"],
+        temperature=0.1,
+    )  # ← repeated in every skill
+    ...
+
+@tool
+def write_code(task: str) -> str:
+    llm = ChatOpenAI(
+        model="coder",
+        base_url="https://llm-gateway.../v1",  # ← again
+        api_key=os.environ["LLM_GATEWAY_API_KEY"],
+        temperature=0.1,
+    )</code></pre>
+          Change the gateway URL → edit every skill file.
+        </div>
       </div>
+      <div>
+        <div class="box box-green">
+          <strong style="color:#86efac">With make_llm() — one place to change</strong>
+          <pre style="margin-top:6px"><code class="python"># skills.py — each skill is now one line
+@tool
+def analyze_data(data: str) -> str:
+    llm = make_llm(MODEL_GENERAL)   # ← that's it
+    ...
+
+@tool
+def write_code(task: str) -> str:
+    llm = make_llm(MODEL_CODE)      # ← different model,
+    ...                             #   same gateway config</code></pre>
+          <br/>
+          <strong>Why skills each call make_llm():</strong> every skill may need a <em>different model</em> — analysis vs. coding vs. fast lookup. The orchestrator chooses <em>which skill</em> to call; the skill chooses <em>which model</em> to use. Separation of concerns.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5b2 — flow diagram -->
+  <section>
+    <h2>How Skills Call make_llm() — The Flow</h2>
+    <p class="small">Each skill call is isolated — its own model, its own context window, returns a plain string</p>
+    <div class="ascii" style="font-size:0.92em;margin-bottom:12px">
+Orchestrator LLM  (MODEL_GENERAL)
+  │  "I need to analyze data AND write code"
+  │
+  ├─► analyze_data("sales=120, users=80")
+  │     └─ make_llm(MODEL_GENERAL).invoke(...)  ← separate context window
+  │        returns: "Revenue up 12%, risk in segment B"
+  │
+  ├─► write_code("bar chart for sales trend")
+  │     └─ make_llm(MODEL_CODE).invoke(...)     ← separate context window
+  │        returns: "import matplotlib..."
+  │
+  └─ "Here is the analysis and the code: ..."   ← orchestrator composes final answer
+    </div>
+    <div class="three-col" style="font-size:0.58em">
       <div class="box box-blue">
-        <span class="mono">make_llm(MODEL_CODE)</span><br/>
-        Used by <code>write_code</code> — code-specialized model, same gateway.
+        <strong>Context isolation</strong><br/>Each skill call has its own clean context — no prior conversation leaks in.
+      </div>
+      <div class="box box-purple">
+        <strong>Model specialization</strong><br/>Right model per job. Coder model never sees analysis prompts.
+      </div>
+      <div class="box box-yellow">
+        <strong>make_llm() is not LangChain API</strong><br/>It's our custom factory wrapping <code>ChatOpenAI</code>. Official docs: <em>langchain_openai.ChatOpenAI</em>
       </div>
     </div>
-    <div class="box box-yellow" style="font-size:0.6em;margin-top:8px">
-      <strong>Note:</strong> <code>make_llm()</code> is a custom factory in <code>agents/config.py</code> — not an official LangChain API. It wraps the official <code>langchain_openai.ChatOpenAI</code> class with your gateway's <code>base_url</code> and <code>api_key</code>.
+  </section>
+
+  <!-- 5c — recursive llm calls -->
+  <section>
+    <h2>Advanced: Recursive LLM Calls Inside a Skill</h2>
+    <p class="small">When input is too large for one call — split, process each chunk, synthesize</p>
+    <div class="two-col" style="font-size:0.61em">
+      <div>
+        <div class="ascii" style="font-size:1.0em;margin-bottom:8px">
+analyze_large_dataset(huge_data)
+  │
+  ├─ chunk 1 → make_llm().invoke()  ← small context
+  │   returns: "segment 1 summary"
+  ├─ chunk 2 → make_llm().invoke()  ← small context
+  │   returns: "segment 2 summary"
+  ├─ chunk 3 → make_llm().invoke()  ← small context
+  │   returns: "segment 3 summary"
+  │
+  └─ make_llm().invoke(summaries)   ← synthesize
+      returns: full report string
+        </div>
+        <div class="box box-green" style="font-size:0.9em">
+          Orchestrator sees <strong>one tool call</strong> and <strong>one result string</strong>. It never knows the skill made multiple LLM calls internally.
+        </div>
+      </div>
+      <div>
+        <pre><code class="python">@tool
+def analyze_large_dataset(data: str) -> str:
+    """Handles datasets too large for one context."""
+    chunks = _split_by_tokens(data, max_tokens=3000)
+
+    # Each chunk → its own small LLM call
+    partials = [
+        make_llm(MODEL_GENERAL).invoke([
+            SystemMessage("Analyze this segment briefly."),
+            HumanMessage(chunk),
+        ]).content
+        for chunk in chunks
+    ]
+
+    # Final synthesis — only summaries, not raw data
+    return make_llm(MODEL_GENERAL).invoke([
+        SystemMessage(
+            "Synthesize these analysis segments "
+            "into one concise report."
+        ),
+        HumanMessage("\n---\n".join(partials)),
+    ]).content</code></pre>
+      </div>
+    </div>
+    <div class="box box-yellow" style="font-size:0.58em;margin-top:8px">
+      This is not recursive in the strict CS sense — no function calls itself. It is <strong>chained parallel LLM calls</strong> (map) followed by one <strong>synthesis call</strong> (reduce). Each call uses only a fraction of the context window. The parent orchestrator's context is completely unaffected.
     </div>
   </section>
 
