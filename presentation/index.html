@@ -76,29 +76,29 @@
 <section>
   <h2>The Problem with Today's Setup</h2>
   <div class="two-col" style="font-size:0.68em">
-    <div class="box box-red">
-      <div style="font-weight:bold;color:#fca5a5;margin-bottom:8px">⚠ Fragmented Toolchain</div>
+    <div class="box box-green">
+      <div style="font-weight:bold;color:#86efac;margin-bottom:8px">✅ OpenCode is great for…</div>
       <ul>
-        <li>Team split: <strong>LangGraph</strong> for loops vs <strong>OpenCode</strong> for terminal skills</li>
-        <li>Raw FastAPI glue between them</li>
-        <li>Separate memory, context, threading per tool</li>
-        <li>No shared state between sessions</li>
+        <li>Individual developers — fast, interactive, terminal-native</li>
+        <li>One-shot tasks: "write this function", "fix this bug"</li>
+        <li>Bash + file tools built-in, familiar workflow</li>
+        <li>OpenCode serve + TUI = powerful remote pair</li>
       </ul>
     </div>
-    <div class="box box-red">
-      <div style="font-weight:bold;color:#fca5a5;margin-bottom:8px">⚠ OpenCode Limits</div>
+    <div class="box box-yellow">
+      <div style="font-weight:bold;color:#fde68a;margin-bottom:8px">⚠ But when tasks grow beyond the terminal…</div>
       <ul>
-        <li>Great at a developer terminal — not production-ready</li>
-        <li>No persistent thread state across tasks</li>
-        <li>No structured planning — humans verify nothing</li>
-        <li>Context window fills with file content</li>
-        <li>Can't pause mid-task for human input</li>
+        <li>Multi-step, cross-session tasks lose state on exit</li>
+        <li>No structured plan visible to reviewers</li>
+        <li>Files dumped into context → window overflows</li>
+        <li>No pause-and-wait for human approval mid-task</li>
+        <li>Cannot deploy to K8s / LangFlow / Foundry</li>
       </ul>
     </div>
   </div>
-  <div class="box box-yellow" style="margin-top:14px;font-size:0.63em">
-    <strong style="color:#fde68a">Goal:</strong>
-    one harness that replaces OpenCode for shared tasks, adds state + planning + specialised LLMs + human oversight, and deploys to any platform.
+  <div class="box box-blue" style="margin-top:14px;font-size:0.63em">
+    <strong style="color:#93c5fd">Goal:</strong>
+    keep your OpenCode skills for solo terminal work — add Deep Agents for orchestrated, stateful, team-reviewable, platform-deployable tasks.
   </div>
 </section>
 
@@ -109,57 +109,57 @@
 
   <!-- 3a — comparison -->
   <section>
-    <h2>Why Deep Agents Beat OpenCode</h2>
+    <h2>OpenCode vs Deep Agents — Use the Right Tool</h2>
     <table class="vs-table">
       <thead>
         <tr>
-          <th>Capability</th>
-          <th><span class="tag tag-red">OpenCode / raw scripting</span></th>
+          <th>When to use…</th>
+          <th><span class="tag tag-green">OpenCode</span></th>
           <th><span class="tag tag-purple">Deep Agent (LangGraph)</span></th>
         </tr>
       </thead>
       <tbody>
-        <tr><td>Persistent thread state</td><td>❌ lost on process exit</td><td>✅ saved to checkpointer</td></tr>
-        <tr><td>Structured planning</td><td>❌ implicit in prompt only</td><td>✅ write_todos → published plan</td></tr>
-        <tr><td>File management</td><td>❌ dumps files into context</td><td>✅ VFS — files never touch context window</td></tr>
-        <tr><td>Multi-model routing</td><td>❌ one model for everything</td><td>✅ right model per task (skills bus)</td></tr>
-        <tr><td>Human-in-the-loop</td><td>❌ ctrl-C and re-run</td><td>✅ interrupt() → choice → resume</td></tr>
-        <tr><td>Audit / replay</td><td>❌ log file only</td><td>✅ full state history in checkpointer</td></tr>
-        <tr><td>Platform deployment</td><td>❌ developer laptop only</td><td>✅ K8s + Aegra, LangFlow, Foundry</td></tr>
-        <tr><td>Nested sub-agents</td><td>❌ manual piping</td><td>✅ any graph is a tool</td></tr>
+        <tr><td>Solo dev — quick task</td><td>✅ fast, interactive TUI</td><td>overhead not worth it</td></tr>
+        <tr><td>Bash / file ops in terminal</td><td>✅ built-in bash, read, write</td><td>✅ via MCP or execute tool</td></tr>
+        <tr><td>Multi-step, multi-session task</td><td>state lost on exit</td><td>✅ checkpointer saves everything</td></tr>
+        <tr><td>Structured plan visible to team</td><td>prompt only</td><td>✅ write_todos → published plan</td></tr>
+        <tr><td>Large files / artifacts</td><td>dumped into context window</td><td>✅ VFS — paths only, never content</td></tr>
+        <tr><td>Pause for human approval</td><td>ctrl-C and re-run</td><td>✅ interrupt() → choice → resume</td></tr>
+        <tr><td>Different models per task</td><td>one model per session</td><td>✅ skills bus — right model per tool</td></tr>
+        <tr><td>K8s / LangFlow / Foundry deploy</td><td>developer laptop only</td><td>✅ platform-deployable</td></tr>
       </tbody>
     </table>
+    <div class="small center" style="margin-top:8px">OpenCode and Deep Agents are <strong>complementary</strong> — use both for what each does best.</div>
   </section>
 
   <!-- 3b — for opencode devs specifically -->
   <section>
-    <h2>For OpenCode Developers — The Migration</h2>
+    <h2>For OpenCode Developers — Adding Deep Agents</h2>
     <div class="two-col" style="font-size:0.65em">
       <div>
-        <div class="box box-red">
-          <strong style="color:#fca5a5">What you do today (OpenCode)</strong>
-          <pre style="margin-top:8px"><code class="bash"># You: write a prompt, run it, wait, read output
-opencode "Analyze sales data in ./data.csv,
-          write a Python script to visualise it,
-          then run it and show me the chart"
+        <div class="box box-green">
+          <strong style="color:#86efac">Keep using OpenCode for…</strong>
+          <pre style="margin-top:8px"><code class="bash"># Great for: quick terminal tasks
+opencode "Refactor this function to use async/await"
+opencode "Write unit tests for auth.py"
 
-# Single shot. If it fails halfway:
-# — context is gone
-# — re-run from scratch
-# — no record of what it tried</code></pre>
+# OpenCode serve + TUI = remote pair-programming
+opencode serve          # start server
+opencode               # attach TUI from anywhere
+
+# Your skills here — bash, file read/write,
+# grep, glob — still your primary dev tools</code></pre>
         </div>
       </div>
       <div>
-        <div class="box box-green">
-          <strong style="color:#86efac">What you do with Deep Agent</strong>
-          <pre style="margin-top:8px"><code class="python"># Same task — but now:
-# 1. Agent publishes its plan (write_todos)
-# 2. Reads the file into VFS (not context)
-# 3. Calls analyze_data skill (right LLM)
-# 4. Calls write_code skill (coder LLM)
-# 5. Saves result to VFS path
-# 6. Asks YOU: "run it or refine first?" (HITL)
-# 7. State saved — resume tomorrow if needed
+        <div class="box box-blue">
+          <strong style="color:#93c5fd">Add Deep Agent for orchestration</strong>
+          <pre style="margin-top:8px"><code class="python"># When the task spans sessions, teams, or platforms:
+# 1. Publishes plan (write_todos) — reviewable
+# 2. Stores files in VFS — context never overflows
+# 3. Right model per skill (coder / analyst)
+# 4. HITL pause — team approves before executing
+# 5. State survives restart — resume tomorrow
 
 agent.invoke({
     "messages": [{"role": "user",
@@ -168,8 +168,8 @@ agent.invoke({
         </div>
       </div>
     </div>
-    <div class="box box-blue" style="font-size:0.62em;margin-top:6px">
-      The LLM gateway connection, model names, and tool selection stay exactly the same as what you configure today — only the <em>orchestration layer</em> changes.
+    <div class="box box-yellow" style="font-size:0.62em;margin-top:6px">
+      Same LLM gateway key, same model names — just wired through <code>config.py</code>. No learning curve on credentials.
     </div>
   </section>
 
@@ -243,40 +243,26 @@ def make_llm(model: str = MODEL_GENERAL, temperature: float = 0.1):
 
   <!-- 5b — skills use it -->
   <section>
-    <h2>Every Skill Uses make_llm()</h2>
-    <p class="small">Skills are just tools that call make_llm() — each gets the right model for its job.</p>
-    <pre><code class="python"># agents/skills.py
-
-from agents.config import make_llm, MODEL_GENERAL, MODEL_CODE
-from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_core.tools import tool
-
-@tool
-def analyze_data(data: str) -> str:
-    """Analyze data and return structured insights."""
-    llm = make_llm(MODEL_GENERAL)          # ← general reasoning model
-    return llm.invoke([
-        SystemMessage("You are a senior data analyst. Be concise and structured."),
-        HumanMessage(f"Analyze this data:\n{data}"),
-    ]).content
-
-@tool
-def write_code(task: str, language: str = "python") -> str:
-    """Write production-quality code for a given task."""
-    llm = make_llm(MODEL_CODE)             # ← code-specialized model
-    return llm.invoke([
-        SystemMessage(f"You are an expert {language} developer. Write clean, documented code."),
-        HumanMessage(task),
-    ]).content
-
-@tool
-def search_knowledge(query: str) -> str:
-    """Search internal knowledge base and synthesise an answer."""
-    llm = make_llm(MODEL_GENERAL)          # ← synthesis after Glean retrieval
-    # ... Glean API call + LLM synthesis ...</code></pre>
-    <div class="box box-yellow" style="font-size:0.6em;margin-top:6px">
-      To change the model for a skill: update <code>MODEL_CODE</code> or <code>MODEL_GENERAL</code>
-      in <code>config.py</code>. No other file changes needed.
+    <h2>Skills Use make_llm() — One Call Each</h2>
+    <p class="small">Each skill is an isolated, non-recursive LLM call. Orchestrator decides; skill executes once.</p>
+    <div class="ascii" style="font-size:0.88em;margin-bottom:10px">
+Orchestrator LLM
+  ├─ calls analyze_data(...)  → Analyst LLM  (1 call, returns string)
+  ├─ calls write_code(...)    → Coder LLM    (1 call, returns string)
+  └─ combines results → final answer to user
+    </div>
+    <div class="two-col" style="font-size:0.6em">
+      <div class="box box-purple">
+        <span class="mono">make_llm(MODEL_GENERAL)</span><br/>
+        Used by <code>analyze_data</code>, <code>search_knowledge</code> — reasoning, synthesis.
+      </div>
+      <div class="box box-blue">
+        <span class="mono">make_llm(MODEL_CODE)</span><br/>
+        Used by <code>write_code</code> — code-specialized model, same gateway.
+      </div>
+    </div>
+    <div class="box box-yellow" style="font-size:0.6em;margin-top:8px">
+      <strong>Note:</strong> <code>make_llm()</code> is a custom factory in <code>agents/config.py</code> — not an official LangChain API. It wraps the official <code>langchain_openai.ChatOpenAI</code> class with your gateway's <code>base_url</code> and <code>api_key</code>.
     </div>
   </section>
 
@@ -890,20 +876,20 @@ print(get_vfs(thread))          # {"solution.py": "def parse_csv(..."})</code></
       <div class="box box-green" style="text-align:center">
         <div style="font-size:1.8em">🌊</div>
         <strong style="color:#86efac">LangFlow</strong><br/>
-        <span class="chip chip-green">✓ Native agent node</span><br/><br/>
-        Deep Agent added directly as a LangFlow component — drag and drop.
+        <span class="chip chip-green">✓ Custom Component</span><br/><br/>
+        Wrap graph in a <code>Component</code> class — becomes a draggable canvas node.
       </div>
       <div class="box box-blue" style="text-align:center">
         <div style="font-size:1.8em">☁</div>
         <strong style="color:#93c5fd">Azure AI Foundry</strong><br/>
-        <span class="chip chip-green">✓ Hosted agent</span><br/><br/>
-        Deploy as containerised Azure AI Agent — full LangGraph control.
+        <span class="chip chip-green">✓ Official SDK</span><br/><br/>
+        <code>langchain-azure-ai</code> package — GA, deep LangGraph support.
       </div>
       <div class="box box-gray" style="text-align:center">
         <div style="font-size:1.8em">🔍</div>
         <strong style="color:#94a3b8">Glean</strong><br/>
         <span class="chip chip-gray">⊘ Tool only — not a host</span><br/><br/>
-        Search tool <em>inside</em> the Deep Agent. Cannot host agents.
+        Search tool <em>inside</em> the Deep Agent via <code>as_langchain_tool()</code>.
       </div>
     </div>
     <p class="small center" style="margin-top:12px">↓ navigate down for details</p>
@@ -911,21 +897,21 @@ print(get_vfs(thread))          # {"solution.py": "def parse_csv(..."})</code></
 
   <!-- 12b — LangFlow -->
   <section>
-    <h2>🌊 LangFlow — Native Agent Node</h2>
+    <h2>🌊 LangFlow — Custom Component Wrapper</h2>
     <div class="two-col" style="font-size:0.65em">
       <div>
         <div class="box box-green">
-          <strong style="color:#86efac">Deep Agent as a LangFlow component</strong><br/><br/>
-          Wrap the compiled graph in a <code>Component</code> class.
-          It appears in LangFlow's canvas as a first-class draggable block.
-          No-code users wire inputs and outputs visually.
-          Developers edit the graph internals when needed.
+          <strong style="color:#86efac">How it works</strong><br/><br/>
+          LangFlow has no built-in "import LangGraph graph" node. You write a
+          <code>Component</code> subclass that wraps your compiled graph.
+          It appears in LangFlow's canvas as a draggable block with typed inputs/outputs.
+          No-code users wire it visually; developers control the graph internals.
         </div>
         <div class="box box-blue" style="margin-top:8px">
           <strong style="color:#93c5fd">LLM gateway in LangFlow</strong><br/><br/>
-          The component calls <code>make_llm()</code> internally — it reads
-          <code>LLM_GATEWAY_API_KEY</code> from the environment.
-          Set it once in LangFlow's secrets store; all agent components inherit it.
+          The component calls <code>make_llm()</code> internally — reads
+          <code>LLM_GATEWAY_API_KEY</code> from environment.
+          Set once in LangFlow's secrets store; all components inherit it.
         </div>
       </div>
       <div>
@@ -963,45 +949,42 @@ class DeepAgentComponent(Component):
 
   <!-- 12c — Foundry -->
   <section>
-    <h2>☁ Azure AI Foundry — Hosted Agent</h2>
-    <div class="two-col" style="font-size:0.65em">
+    <h2>☁ Azure AI Foundry — Official LangGraph SDK</h2>
+    <div class="two-col" style="font-size:0.62em">
       <div>
         <div class="box box-blue">
-          <strong style="color:#93c5fd">Two paths in Foundry</strong>
-          <table style="margin-top:8px;width:100%;font-size:0.9em;border-collapse:collapse">
-            <tr>
-              <td style="padding:5px 8px;color:#fca5a5">❌ Prompt Agents</td>
-              <td style="padding:5px 8px">No custom loops, no VFS, no HITL</td>
-            </tr>
-            <tr>
-              <td style="padding:5px 8px;color:#86efac">✅ Azure AI Agents (container)</td>
-              <td style="padding:5px 8px">Full control — your Docker image, your LangGraph</td>
-            </tr>
-          </table>
+          <strong style="color:#93c5fd">langchain-azure-ai</strong> — GA, April 2026<br/>
+          <pre style="margin-top:6px"><code class="language-bash">pip install langchain-azure-ai[tools] azure-identity</code></pre>
+          <pre style="margin-top:4px"><code class="language-python">from langchain_azure_ai.agents import AgentServiceFactory
+from azure.identity import DefaultAzureCredential
+
+factory = AgentServiceFactory(
+    project_endpoint=os.environ["AZURE_AI_PROJECT_ENDPOINT"],
+    credential=DefaultAzureCredential()
+)
+# Wrap existing Foundry-managed agent as LangGraph node
+node = factory.get_agent_node(name="my-deep-agent")</code></pre>
         </div>
         <div class="box box-yellow" style="margin-top:8px">
-          <strong style="color:#fde68a">LLM gateway in Foundry</strong><br/><br/>
-          Pass <code>LLM_GATEWAY_API_KEY</code> and
-          <code>LLM_GATEWAY_URL</code> as container environment variables
-          in the Foundry deployment config.
-          The agent code is unchanged.
+          <strong style="color:#fde68a">MCP as a Foundry built-in tool</strong><br/>
+          <code>MCPTool(server_url="...", require_approval="always")</code> — runs server-side, no local process needed.
         </div>
       </div>
       <div>
-        <pre><code class="dockerfile"># Same image for K8s, Foundry, and local dev
-FROM python:3.11-slim
+        <div class="box box-green" style="margin-bottom:8px">
+          <strong style="color:#86efac">What Foundry provides</strong><br/>
+          Full LangGraph StateGraph, VFS, HITL interrupt, MCP tools, OTEL tracing → Azure Monitor. Same Docker image works on K8s and Foundry.
+        </div>
+        <pre><code class="dockerfile">FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
 EXPOSE 8001
-
-# Aegra server — LangGraph Platform REST spec
 CMD ["uvicorn", "servers.aegra_server:app",
      "--host", "0.0.0.0", "--port", "8001"]</code></pre>
-        <div class="box box-purple" style="font-size:0.85em;margin-top:8px">
-          Foundry calls <code>POST /threads/{id}/runs/stream</code> — the standard Aegra endpoint.
-          No LangSmith license. No vendor lock-in.
+        <div class="box box-purple" style="font-size:0.85em;margin-top:6px">
+          LLM gateway: pass <code>LLM_GATEWAY_API_KEY</code> + <code>LLM_GATEWAY_URL</code> as container env vars. Zero code changes.
         </div>
       </div>
     </div>
@@ -1009,26 +992,28 @@ CMD ["uvicorn", "servers.aegra_server:app",
 
   <!-- 12d — Glean -->
   <section>
-    <h2>🔍 Glean — Search Tool, Not Agent Host</h2>
-    <div class="two-col" style="font-size:0.66em">
+    <h2>🔍 Glean — Search Tool Inside Deep Agent</h2>
+    <div class="two-col" style="font-size:0.63em">
       <div>
-        <div class="box box-gray">
-          <strong style="color:#94a3b8">Why Glean can't host the Deep Agent</strong><br/><br/>
-          Glean is a <strong>search platform</strong>, not an agent runtime.
-          It has no concept of stateful graph execution, VFS, tool loops,
-          or HITL interrupts.
-          There is no Glean API for running custom LangGraph graphs.
+        <div class="box box-gray" style="margin-bottom:8px">
+          <strong style="color:#94a3b8">Glean cannot host the Deep Agent</strong><br/>
+          No stateful graph execution, no VFS, no HITL. Glean Agents API manages only Glean-internal agents — not external LangGraph graphs.
         </div>
-        <div class="box box-green" style="margin-top:8px">
-          <strong style="color:#86efac">What Glean provides</strong><br/><br/>
-          Glean exposes a REST search API that returns ranked document
-          snippets from your internal knowledge base.
-          The Deep Agent calls it as one tool among many — results are
-          synthesised by the LLM and written to VFS, not dumped into context.
+        <div class="box box-green">
+          <strong style="color:#86efac">What Glean provides (via glean-agent-toolkit)</strong><br/><br/>
+          <code>glean_search.as_langchain_tool()</code> — official adapter converts Glean search into a LangChain-compatible tool. Drop it directly into the Deep Agent's tool list.
+          <pre style="margin-top:8px"><code class="language-python">from glean.agent_toolkit.tools import glean_search
+
+langchain_tool = glean_search.as_langchain_tool()
+DEEP_AGENT = build_deep_agent(
+    extra_tools=[langchain_tool]
+)</code></pre>
         </div>
       </div>
       <div>
-        <pre><code class="python">@tool
+        <div class="box box-blue">
+          <strong style="color:#93c5fd">Or call Glean API directly as a skill</strong>
+          <pre style="margin-top:8px"><code class="language-python">@tool
 def search_knowledge(query: str) -> str:
     """Search enterprise knowledge via Glean."""
     resp = requests.post(
@@ -1036,16 +1021,16 @@ def search_knowledge(query: str) -> str:
         headers={"Authorization": f"Bearer {GLEAN_TOKEN}"},
         json={"query": query, "pageSize": 5},
     )
-    hits  = resp.json().get("results", [])
-    docs  = "\n\n".join(
-        h["document"]["title"] + "\n" + h["snippets"][0]["text"]
-        for h in hits
+    hits = resp.json().get("results", [])
+    docs = "\n\n".join(
+        h["document"]["title"] + "\n" +
+        h["snippets"][0]["text"] for h in hits
     )
-    # Synthesise with general LLM from gateway
     return make_llm(MODEL_GENERAL).invoke(
-        f"Answer based on:\n{docs}\n\nQuestion: {query}"
+        f"Answer based on:\n{docs}\n\nQ: {query}"
     ).content</code></pre>
-        <div class="small">Glean = enterprise search index. Deep Agent = reasoning engine on top.</div>
+        </div>
+        <div class="small" style="margin-top:6px">Glean = enterprise search index. Deep Agent = reasoning and orchestration on top. Results written to VFS — never to context window.</div>
       </div>
     </div>
   </section>
@@ -1053,7 +1038,215 @@ def search_knowledge(query: str) -> str:
 </section>
 
 <!-- ══════════════════════════════════════════════════════════════════
-     13. DEMO
+     13. BUILT-IN TOOLS + MCP + K8s SHELL
+═══════════════════════════════════════════════════════════════════ -->
+<section>
+
+  <!-- 13a — built-in tools -->
+  <section data-background-gradient="radial-gradient(ellipse at top-left, #0f2040 0%, #0f1117 70%)">
+    <h2>Deep Agents — Built-in Tools</h2>
+    <p class="small">Ships with the same tool surface as OpenCode — plus orchestration primitives</p>
+    <div class="three-col" style="font-size:0.6em">
+      <div class="box box-green">
+        <strong style="color:#86efac">File System</strong><br/><br/>
+        <span class="mono">read_file</span> · <span class="mono">write_file</span> · <span class="mono">edit_file</span><br/>
+        <span class="mono">ls</span> · <span class="mono">glob</span> · <span class="mono">grep</span><br/><br/>
+        Same ops as OpenCode. Files stored off context window.
+      </div>
+      <div class="box box-yellow">
+        <strong style="color:#fde68a">Shell Execution</strong><br/><br/>
+        <span class="mono">execute</span> — runs arbitrary bash<br/><br/>
+        Requires a sandbox backend (Modal, Runloop, Daytona, or <strong>your K8s container</strong>).
+      </div>
+      <div class="box box-purple">
+        <strong style="color:#c4b5fd">Orchestration</strong><br/><br/>
+        <span class="mono">write_todos</span> — publish plan<br/>
+        <span class="mono">task</span> — spawn sub-agent<br/><br/>
+        No equivalent in OpenCode.
+      </div>
+    </div>
+    <div class="box box-blue" style="font-size:0.58em;margin-top:10px">
+      <strong>VFS + bash integration:</strong> agent writes a script to VFS path → <span class="mono">execute("python /vfs/chart.py")</span> → output captured → written back to VFS. Files never travel through the context window at any step.
+    </div>
+  </section>
+
+  <!-- 13b — MCP support -->
+  <section data-background-gradient="radial-gradient(ellipse at top-left, #0f2040 0%, #0f1117 70%)">
+    <h2>MCP Tool Servers</h2>
+    <p class="small">Deep Agents has first-class MCP support via <span class="mono">langchain-mcp-adapters</span></p>
+    <div class="two-col" style="font-size:0.62em">
+      <div>
+        <div class="box box-blue">
+          <strong>.mcp.json</strong> — project root (Claude Code compatible format)
+          <pre style="margin-top:8px"><code class="language-json">{
+  "mcpServers": {
+    "k8s-shell": {
+      "type": "sse",
+      "url": "https://mcp.internal/k8s-shell",
+      "headers": { "Authorization": "Bearer $MCP_KEY" }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/vfs"]
+    }
+  }
+}</code></pre>
+        </div>
+      </div>
+      <div>
+        <div class="box box-green" style="margin-bottom:8px">
+          <strong>Discovery priority</strong> (highest wins):<br/><br/>
+          <ol style="line-height:1.8">
+            <li><span class="mono">--mcp-config PATH</span> (CLI flag)</li>
+            <li><span class="mono">&lt;project&gt;/.mcp.json</span> (root)</li>
+            <li><span class="mono">&lt;project&gt;/.deepagents/.mcp.json</span></li>
+            <li><span class="mono">~/.deepagents/.mcp.json</span> (user)</li>
+          </ol>
+        </div>
+        <div class="box box-yellow">
+          MCP tools appear automatically in the agent's context — no code changes needed to add a new server.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13c — K8s MCP plan -->
+  <section data-background-gradient="radial-gradient(ellipse at top-left, #0f2040 0%, #0f1117 70%)">
+    <h2>Planned: K8s MCP Shell Server</h2>
+    <p class="small">MCP server that provisions an isolated shell inside Kubernetes — privileged where needed</p>
+    <div class="two-col" style="font-size:0.62em">
+      <div>
+        <div class="ascii" style="font-size:1.0em">
+Deep Agent  (LangGraph)
+  │
+  │  MCP tool call: bash("run lab")
+  ▼
+K8s MCP Server  (our code)
+  │
+  ├─ spawn Pod  (privileged container)
+  │   ├─ bash / read / write tools
+  │   └─ containerlab deploy access
+  │
+  ├─ stream stdout back to agent
+  └─ write output to VFS path
+        </div>
+      </div>
+      <div>
+        <div class="box box-purple" style="margin-bottom:8px">
+          <strong style="color:#c4b5fd">MCP tools exposed</strong><br/>
+          <span class="mono">bash(cmd)</span> · <span class="mono">read_file(path)</span> · <span class="mono">write_file(path, content)</span><br/><br/>
+          Same API surface as OpenCode — agent needs no retraining.
+        </div>
+        <div class="box box-red">
+          <strong style="color:#fca5a5">K8s capabilities</strong><br/>
+          Privileged pod · <code>CAP_NET_ADMIN</code><br/>
+          ContainerLab labs · custom CNI<br/>
+          Namespaced per thread_id → isolated
+        </div>
+        <div class="box box-green" style="margin-top:8px">
+          Agent writes a topology file to VFS → calls <span class="mono">bash("containerlab deploy -t /vfs/lab.yaml")</span> → reads result back to VFS. Full lab lifecycle from a chat message.
+        </div>
+      </div>
+    </div>
+  </section>
+
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     14. Deep Agents CLI
+═══════════════════════════════════════════════════════════════════ -->
+<section>
+  <!-- 14.0 parent — what is it -->
+  <section data-background-gradient="radial-gradient(ellipse at top-right, #0f2040 0%, #0f1117 70%)">
+    <h2>Deep Agents CLI</h2>
+    <p class="small" style="margin-bottom:8px">Official LangChain project — open-source, like Claude Code but for LangGraph</p>
+    <div class="two-col" style="font-size:0.62em">
+      <div class="box box-blue">
+        <strong>What it is</strong><br/><br/>
+        <span class="chip chip-green">github.com/langchain-ai/deepagents</span><br/><br/>
+        An interactive CLI with a Textual-based TUI. Run Deep Agent tasks from the terminal — streaming responses, tool call display, thread history — without writing any server code.
+      </div>
+      <div class="box box-purple">
+        <strong>The OpenCode analogy</strong><br/><br/>
+        <table style="font-size:0.9em;width:100%">
+          <tr><th>OpenCode</th><th>Deep Agents CLI</th></tr>
+          <tr><td>Code-focused agent</td><td>General / orchestration agent</td></tr>
+          <tr><td><span class="mono">opencode serve</span></td><td><span class="mono">deepagents --acp</span></td></tr>
+          <tr><td>Connect TUI to server</td><td>Same — ACP attach</td></tr>
+          <tr><td>Proprietary</td><td>Open source (Apache 2.0)</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="box box-gray" style="font-size:0.58em;margin-top:10px">
+      <strong>Install:</strong><br/>
+      <span class="mono">curl -LsSf https://raw.githubusercontent.com/langchain-ai/deepagents/main/libs/cli/scripts/install.sh | bash</span><br/>
+      or &nbsp;<span class="mono">pip install deepagents-cli</span>
+    </div>
+  </section>
+
+  <!-- 14.1 TUI + ACP server -->
+  <section data-background-gradient="radial-gradient(ellipse at top-right, #0f2040 0%, #0f1117 70%)">
+    <h2>TUI mode &amp; ACP server mode</h2>
+    <div class="two-col" style="font-size:0.62em">
+      <div class="box box-green">
+        <strong>Interactive TUI</strong><br/>
+        <pre style="font-size:0.85em"><code class="language-bash"># launch interactive session
+deepagents
+
+# with a starting task
+deepagents -m "Analyze sales data and write a report"
+
+# skip confirmation prompts
+deepagents -m "Refactor utils.py" -y</code></pre>
+        Streaming tokens, tool call spinners, thread persistence — all in terminal.
+      </div>
+      <div class="box box-yellow">
+        <strong>ACP server mode</strong> (like <span class="mono">opencode serve</span>)<br/>
+        <pre style="font-size:0.85em"><code class="language-bash"># start as ACP server
+deepagents --acp
+
+# then attach from another TUI
+deepagents --attach &lt;server-url&gt;</code></pre>
+        Lets you run the agent headlessly on a remote machine and connect a local TUI — same pattern as OpenCode serve+TUI.
+      </div>
+    </div>
+    <div class="three-col" style="font-size:0.57em;margin-top:8px">
+      <div class="box box-gray"><span class="mono">--max-turns N</span><br/>Cap iterations</div>
+      <div class="box box-gray"><span class="mono">--non-interactive</span><br/>Headless / CI mode</div>
+      <div class="box box-gray"><span class="mono">-S "cmd1,cmd2"</span><br/>Allowed shell cmds</div>
+    </div>
+  </section>
+
+  <!-- 14.2 LLM gateway config -->
+  <section data-background-gradient="radial-gradient(ellipse at top-right, #0f2040 0%, #0f1117 70%)">
+    <h2>Connecting to the LLM Gateway</h2>
+    <p class="small">Same credentials you already use with OpenCode</p>
+    <div class="box box-blue" style="font-size:0.6em;margin-bottom:10px">
+      <strong>Option A — environment variables</strong>
+      <pre><code class="language-bash">export OPENAI_API_BASE="https://llm-gateway.internal/v1"
+export OPENAI_API_KEY="$LLM_GATEWAY_KEY"
+deepagents --model openai:qwen3:8b</code></pre>
+    </div>
+    <div class="box box-purple" style="font-size:0.6em;margin-bottom:10px">
+      <strong>Option B — config file</strong> (<span class="mono">~/.deepagents/config.toml</span>)
+      <pre><code class="language-toml">[model]
+provider = "openai"
+name     = "qwen3:8b"
+base_url = "https://llm-gateway.internal/v1"
+api_key  = "from-env:LLM_GATEWAY_KEY"</code></pre>
+    </div>
+    <div class="box box-green" style="font-size:0.6em">
+      <strong>In-session commands</strong> — no restart needed<br/>
+      <span class="mono">/model openai:qwen2.5-coder:14b</span> &nbsp;·&nbsp;
+      <span class="mono">/agents</span> &nbsp;·&nbsp;
+      <span class="mono">/threads</span> &nbsp;·&nbsp;
+      <span class="mono">/skill:analyze_data</span>
+    </div>
+  </section>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     15. DEMO
 ═══════════════════════════════════════════════════════════════════ -->
 <section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
   <h2>Live Demo</h2>
