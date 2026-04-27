@@ -1354,33 +1354,342 @@ api_key  = "from-env:LLM_GATEWAY_KEY"</code></pre>
 </section>
 
 <!-- ══════════════════════════════════════════════════════════════════
-     15. DEMO
+     15. DEMO — Three Patterns, One Deep Agent
 ═══════════════════════════════════════════════════════════════════ -->
-<section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
-  <h2>Live Demo</h2>
-  <div class="two-col" style="font-size:0.68em;margin-top:8px">
-    <div class="box box-blue">
-      <strong>FastAPI server</strong> — port 8000<br/>
-      <span class="mono">POST /api/deep/stream</span><br/>
-      Raw SSE → parse <code>data.type</code>
+<section>
+
+  <!-- 15a — overview -->
+  <section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
+    <h2>Demo — Same Deep Agent, Three Integration Patterns</h2>
+    <div class="ascii" style="font-size:0.88em">
+┌─────────────────────────────────────────────────────────────────────┐
+│              React GUI  (port 3000 · nginx reverse proxy)            │
+│                                                                       │
+│   ┌─────────────┐   ┌─────────────┐   ┌──────────────────────────┐  │
+│   │   FastAPI   │   │    Aegra    │   │        Langflow           │  │
+│   │    mode     │   │    mode     │   │         mode              │  │
+│   └──────┬──────┘   └──────┬──────┘   └────────────┬─────────────┘  │
+└──────────┼─────────────────┼──────────────────────┼─────────────────┘
+           │                 │                        │
+    POST /chat/stream  POST /threads/{id}      POST /langflow/
+    flat {type:…} SSE  /runs/stream            api/v1/run/{flow_id}
+    server manages     named event: SSE         Langflow flow
+    thread             you own thread           → component
+           │                 │                        │
+           └────────────────►│◄───────────────────────┘
+                    template-server :8001
+                    LangGraph Deep Agent
+                    (same graph, same tools,
+                     same PostgreSQL VFS)
     </div>
-    <div class="box box-purple">
-      <strong>Aegra server</strong> — port 8001<br/>
-      <span class="mono">POST /threads/{id}/runs/stream</span><br/>
-      Typed SSE <code>event:</code> names
+    <div class="small center" style="margin-top:8px">
+      All three hit the same agent. The difference is the <strong>API contract</strong> and <strong>who manages the thread</strong>.
     </div>
-  </div>
-  <div style="margin-top:16px;font-size:0.65em">
-    <div style="margin-bottom:8px"><strong class="hl-green">Demo 1 — Simple Agent:</strong><br/>
-      "Write name=Alice, role=engineer to the store then read it back"
+  </section>
+
+  <!-- 15b — FastAPI mode -->
+  <section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
+    <h2>Mode A — FastAPI <span class="tag tag-blue">POST /chat/stream</span></h2>
+    <div class="two-col" style="font-size:0.63em">
+      <div>
+        <div class="box box-blue">
+          <strong style="color:#93c5fd">Server side</strong> — <code>main.py</code>
+          <pre style="margin-top:8px"><code class="python">@app.post("/chat/stream")
+def chat_stream(request: Request, body: ChatStreamRequest):
+    # Creates/reuses thread internally
+    tid = body.thread_id or str(uuid.uuid4())
+    if not thread_get(tid):
+        thread_create(tid, {})
+    # Translates Aegra named events → flat type schema
+    async def generator():
+        async for chunk in _stream_run(agent, tid, ...):
+            ev = chunk["event"]
+            if ev == "messages/partial":
+                yield {"data": json.dumps({"type":"token","content":...})}
+            elif ev == "values":
+                yield {"data": json.dumps({"type":"vfs_update","vfs":...})}
+            elif ev == "end":
+                yield {"data": json.dumps({"type":"done"})}
+    return EventSourceResponse(generator())</code></pre>
+        </div>
+      </div>
+      <div>
+        <div class="box box-green">
+          <strong style="color:#86efac">React GUI — <code>runFastAPI()</code></strong>
+          <pre style="margin-top:8px"><code class="javascript">function runFastAPI(message, h) {
+  // Uses mode's stable sessionId as thread_id
+  // → same thread reused across messages
+  streamFetch("/api/chat/stream", "POST",
+    JSON.stringify({ message, thread_id: bucket.serverThreadId }),
+    function(evName, data) {
+      if (data.type === "token")
+        h.appendToken(data.content);
+      else if (data.type === "tool_start")
+        h.pushMsg({ role:"tool", ... });
+      else if (data.type === "vfs_update")
+        h.setVfs(v => Object.assign({}, v, data.vfs));
+      else if (data.type === "done")
+        { h.finalizeAI(); setBusy(false); }
+    }
+  );
+}</code></pre>
+        </div>
+        <div class="box box-yellow" style="margin-top:6px;font-size:0.88em">
+          Flat schema — simplest to parse. Server owns the thread lifecycle.
+        </div>
+      </div>
     </div>
-    <div style="margin-bottom:8px"><strong class="hl-blue">Demo 2 — Deep Agent (VFS + skills):</strong><br/>
-      "Analyze dataset: [10,25,15,30] — save findings and write Python to plot it"
+  </section>
+
+  <!-- 15c — Aegra mode -->
+  <section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
+    <h2>Mode B — Aegra <span class="tag tag-purple">LangGraph Platform Spec</span></h2>
+    <div class="two-col" style="font-size:0.63em">
+      <div>
+        <div class="ascii" style="font-size:0.95em">
+SSE event stream from /threads/{id}/runs/stream:
+
+event: metadata
+data: {"run_id":"…","assistant_id":"deep"}
+
+event: updates
+data: {"node":"agent","run_id":"…"}
+
+event: messages/partial
+data: {"content":"Hello","type":"AIMessageChunk"}
+
+event: tool_start
+data: {"tool":"write_file","input":{…}}
+
+event: tool_end
+data: {"tool":"write_file","output":"Written…"}
+
+event: values
+data: {"messages":[…],"vfs":{…},"todos":[…]}
+
+event: end
+data: {}
+        </div>
+      </div>
+      <div>
+        <div class="box box-purple">
+          <strong style="color:#c4b5fd">React GUI — <code>runAegra()</code></strong>
+          <pre style="margin-top:8px"><code class="javascript">function runAegra(message, h) {
+  // First message → create server thread, cache it
+  // Subsequent messages → reuse same thread
+  // (conversation + VFS persist on server)
+  var existing = bucket.serverThreadId;
+  function doRun(tid) {
+    streamFetch("/api/threads/"+tid+"/runs/stream",
+      "POST", JSON.stringify({assistant_id:"deep",
+        input:{messages:[{role:"user",content:message}]}}),
+      function(evName, data) {
+        if (evName==="messages/partial") h.appendToken(data.content);
+        if (evName==="values") {
+          h.setVfs(data.vfs);
+          h.setTodos(data.todos);
+        }
+        if (evName==="interrupt") setHitl({...data, mode:"aegra"});
+        if (evName==="end") { h.finalizeAI(); setBusy(false); }
+      }
+    );
+  }
+  existing ? doRun(existing) : createThread().then(doRun);
+}</code></pre>
+        </div>
+        <div class="box box-blue" style="margin-top:6px;font-size:0.88em">
+          Named events — caller owns thread lifecycle, inspects state via <code>GET /threads/{id}/state</code>.
+        </div>
+      </div>
     </div>
-    <div><strong class="hl-yellow">Demo 3 — HITL:</strong><br/>
-      "Search for sales info, then ask me how detailed the report should be"
+  </section>
+
+  <!-- 15d — Langflow mode architecture -->
+  <section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
+    <h2>Mode C — Langflow <span class="tag tag-green">Flow Orchestration</span></h2>
+    <div class="ascii" style="font-size:0.92em;margin-bottom:10px">
+GUI  →  POST /langflow/api/v1/run/{flow_id}?stream=true
+         │
+         Langflow flow: ChatInput → AegraDeepAgent → ChatOutput
+                                         │
+                              Component.run_agent()
+                                         │
+                              POST /threads/{id}/runs/stream  (Aegra SSE)
+                                         │
+                              iter SSE → on "messages/partial" chunk arrives
+                                         │
+                              self._event_manager.on_token(data={"chunk": chunk})
+                                         │
+                              Langflow EventManager puts {"event":"token",...}
+                              into the async SSE queue
+                                         │
+GUI receives:  event: token              │
+               data: {"chunk":"Hello"}  ◄┘   ← live, token by token
     </div>
-  </div>
+    <div class="three-col" style="font-size:0.58em">
+      <div class="box box-green">
+        <strong>Thread isolation</strong><br/>Each Langflow session creates an Aegra thread tagged <code>{"lf_session": session_id}</code>. After run, GUI calls <code>GET /sessions/{id}/state</code> → VFS + todos.
+      </div>
+      <div class="box box-blue">
+        <strong>Same Deep Agent</strong><br/>Langflow is just another caller of the Aegra API. The agent, VFS, tools, and PostgreSQL backend are identical to FastAPI and Aegra modes.
+      </div>
+      <div class="box box-purple">
+        <strong>No-code extensible</strong><br/>The flow lives in Langflow's canvas. Add preprocessing, routing, or parallel calls visually — without changing the Deep Agent code.
+      </div>
+    </div>
+  </section>
+
+  <!-- 15e — the _event_manager discovery -->
+  <section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
+    <h2>Live Streaming from a Langflow Custom Component</h2>
+    <div class="box box-yellow" style="font-size:0.6em;margin-bottom:10px">
+      <strong style="color:#fde68a">Common misconception:</strong> "Custom Langflow components can't stream tokens — only LangChain LLM nodes can."<br/>
+      <strong style="color:#86efac">Reality:</strong> Langflow injects <code>self._event_manager</code> on every component before execution. Calling <code>on_token()</code> on it is the correct internal API — the same one Langflow's own LLM nodes use.
+    </div>
+    <div class="two-col" style="font-size:0.62em">
+      <div>
+        <div class="box box-red" style="margin-bottom:8px">
+          <strong style="color:#fca5a5">Before — sync component, no streaming</strong>
+          <pre style="margin-top:6px"><code class="python">def run_agent(self) -> Message:
+    tokens = []
+    for token in self._stream_tokens(...):
+        tokens.append(token)   # collect silently
+    return Message(text="".join(tokens))
+    # ↑ Langflow emits add_message AFTER this returns
+    # GUI sees: long silence → full response at once</code></pre>
+        </div>
+      </div>
+      <div>
+        <div class="box box-green">
+          <strong style="color:#86efac">After — forward each token into Langflow's SSE queue</strong>
+          <pre style="margin-top:6px"><code class="python">def run_agent(self) -> Message:
+    tokens = []
+    for token in self._stream_tokens(...):
+        tokens.append(token)
+        # Langflow injected this before calling run_agent()
+        if self._event_manager:
+            self._event_manager.on_token(
+                data={"chunk": token, "id": message_id}
+            )
+            # ↑ puts {"event":"token","data":{…}} into
+            #   the async SSE queue immediately
+    return Message(text="".join(tokens))
+    # GUI sees: live tokens as they arrive ✓</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="box box-blue" style="font-size:0.58em;margin-top:8px">
+      <code>EventManager.on_token()</code> calls <code>self._loop.call_soon_threadsafe(queue.put_nowait, item)</code> — correctly crossing from the sync component thread into the async event loop. Not a hack. This is Langflow's own internal event pipeline.
+    </div>
+  </section>
+
+  <!-- 15f — React per-mode state isolation -->
+  <section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
+    <h2>React GUI — Per-Mode State Isolation</h2>
+    <div class="two-col" style="font-size:0.62em">
+      <div>
+        <div class="box box-red" style="margin-bottom:8px">
+          <strong style="color:#fca5a5">Problem — shared state pollutes modes</strong>
+          <pre style="margin-top:6px"><code class="javascript">// Switching FastAPI → Aegra showed FastAPI's messages
+// Tool results from one mode appeared in another
+const [todos, setTodos] = useState([]);
+const [vfs,   setVfs]   = useState({});
+const [threadId] = useState(() => genId()); // shared!</code></pre>
+        </div>
+        <div class="box box-green">
+          <strong style="color:#86efac">Solution — per-mode data buckets in a ref</strong>
+          <pre style="margin-top:6px"><code class="javascript">const modeDataRef = useRef({
+  fastapi:  { sessionId, msgs:[], raw:[], todos:[], vfs:{}, serverThreadId:null },
+  aegra:    { sessionId, msgs:[], raw:[], todos:[], vfs:{}, serverThreadId:null },
+  langflow: { sessionId, msgs:[], raw:[], todos:[], vfs:{}, serverThreadId:null },
+});
+// Render reads from modeDataRef.current[serverMode]
+// Switching modes instantly shows that mode's history</code></pre>
+        </div>
+      </div>
+      <div>
+        <div class="box box-purple">
+          <strong style="color:#c4b5fd">makeHelpers(mode) — captured-mode closures</strong>
+          <pre style="margin-top:6px"><code class="javascript">function makeHelpers(mode) {
+  function s() { return modeDataRef.current[mode]; }
+  // All writes go to the captured mode's bucket
+  // even if user switches mode mid-run
+  function pushMsg(m)  { s().msgs = [...s().msgs, m]; forceRender(); }
+  function appendToken(c) { /* update last msg in s() */ }
+  function setVfs(u) { s().vfs = typeof u==="function" ? u(s().vfs) : u; forceRender(); }
+  function setTodos(t) { s().todos = t; forceRender(); }
+  return { pushMsg, appendToken, setVfs, setTodos, finalizeAI, pushRaw };
+}
+// Used as:
+var h = makeHelpers(serverMode);  // capture before async starts
+h.pushMsg({ role:"user", content: msg });
+runFastAPI(msg, h);  // h is closed over correct mode</code></pre>
+        </div>
+        <div class="box box-yellow" style="margin-top:6px;font-size:0.88em">
+          React 18 automatic batching (concurrent mode) suppressed intermediate renders inside Promise callbacks. Fixed with <code>ReactDOM.flushSync()</code> per SSE chunk.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15g — VFS across all modes -->
+  <section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
+    <h2>VFS Integration Across All Three Modes</h2>
+    <div class="ascii" style="font-size:0.88em;margin-bottom:10px">
+PostgreSQL  (agentdb)
+  vfs_files table:  thread_id | path | content | updated_at
+  threads table:    thread_id | metadata (JSONB) | status
+  agent_todos:      thread_id | todos (JSONB)
+
+FastAPI mode:   thread_id = modeData.fastapi.sessionId
+  → values event carries full vfs dict at run end
+  → GUI updates Files panel directly from SSE stream
+
+Aegra mode:     thread_id = modeData.aegra.serverThreadId  (created on first message)
+  → values event carries full vfs dict + todos at run end
+  → GUI updates Files + Plan panels directly from SSE stream
+
+Langflow mode:  thread_id = Aegra thread tagged {"lf_session": "lf-&lt;sessionId&gt;"}
+  → after event: end → GUI calls GET /api/sessions/{sessionId}/state
+  → server: SELECT thread WHERE metadata->>'lf_session' = $1
+  → returns vfs_get_all(thread_id) + todos_get(thread_id)
+    </div>
+    <div class="box box-blue" style="font-size:0.6em">
+      All three modes write to the same PostgreSQL VFS table. Switching from Langflow to Aegra with the same session doesn't share VFS — each mode has its own isolated thread and its own Files panel.
+    </div>
+  </section>
+
+  <!-- 15h — live demo prompts -->
+  <section data-background-gradient="radial-gradient(ellipse at center, #1a2040 0%, #0f1117 70%)">
+    <h2>Live Demo</h2>
+    <div class="box box-gray" style="font-size:0.62em;margin-bottom:10px">
+      GUI at <strong>http://localhost:3000</strong> · Langflow canvas at <strong>http://localhost:7860</strong>
+    </div>
+    <div style="font-size:0.65em">
+      <div class="box box-blue" style="margin-bottom:8px">
+        <strong class="hl-blue">Demo 1 — FastAPI mode (live tokens + VFS)</strong><br/>
+        <em>"Write a robot script to test local file existence, save it, then run it"</em><br/>
+        <span class="small">Watch: token stream → tool_start/tool_end badges → Files panel populates</span>
+      </div>
+      <div class="box box-purple" style="margin-bottom:8px">
+        <strong class="hl-yellow">Demo 2 — Aegra mode (thread persistence)</strong><br/>
+        <em>Message 1: "Analyze this dataset: [10,25,15,30], save findings"</em><br/>
+        <em>Message 2: "Now write Python to plot it" ← same thread, VFS persists</em><br/>
+        <span class="small">Watch: Plan tab populates, second message sees first message's VFS files</span>
+      </div>
+      <div class="box box-green" style="margin-bottom:8px">
+        <strong class="hl-green">Demo 3 — Langflow mode (live streaming via _event_manager)</strong><br/>
+        <em>"Write a robot script to test local file existence"</em><br/>
+        <span class="small">Watch: live tokens stream from Langflow → Files panel populates after run via session lookup</span>
+      </div>
+      <div class="box box-yellow">
+        <strong class="hl-yellow">Demo 4 — HITL (Aegra mode)</strong><br/>
+        <em>"Search for sales info, then ask me how detailed the report should be"</em><br/>
+        <span class="small">Watch: agent pauses → choice dialog → resume → completes</span>
+      </div>
+    </div>
+  </section>
+
 </section>
 
 <!-- ══════════════════════════════════════════════════════════════════
