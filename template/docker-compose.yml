@@ -1,0 +1,96 @@
+services:
+
+  # ── PostgreSQL ────────────────────────────────────────────────
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     agent
+      POSTGRES_PASSWORD: agent
+      POSTGRES_DB:       agentdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agent -d agentdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── Deep Agent server (Aegra REST API) ────────────────────────
+  template-server:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL:    postgresql://agent:agent@postgres:5432/agentdb
+      LLM_GATEWAY_URL: ${LLM_GATEWAY_URL}
+      LLM_GATEWAY_KEY: ${LLM_GATEWAY_KEY}
+      MODEL_GENERAL:   ${MODEL_GENERAL:-general}
+      MODEL_CODE:      ${MODEL_CODE:-coder}
+      MODEL_FAST:      ${MODEL_FAST:-fast}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── Langflow (flow builder + API) ─────────────────────────────
+  langflow:
+    image: langflowai/langflow:latest
+    restart: unless-stopped
+    ports:
+      - "7860:7860"
+    environment:
+      LANGFLOW_DATABASE_URL:          postgresql://agent:agent@postgres:5432/langflowdb
+      LANGFLOW_COMPONENTS_PATH:       /app/custom_components
+      LANGFLOW_AUTO_LOGIN:               "true"
+      LANGFLOW_SKIP_AUTH_AUTO_LOGIN:     "true"
+      LANGFLOW_SUPERUSER:                admin
+      LANGFLOW_SUPERUSER_PASSWORD:       admin
+      LANGFLOW_SECRET_KEY:               changeme-in-production
+    volumes:
+      - ./langflow/components:/app/custom_components
+      - langflow_data:/var/lib/langflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "/app/.venv/bin/python -c \"import urllib.request; urllib.request.urlopen('http://localhost:7860/health')\""]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+
+  # ── One-shot: creates the Deep Agent flow in Langflow ─────────
+  langflow-init:
+    image: python:3.11-slim
+    command: >
+      sh -c "pip install requests -q --no-cache-dir &&
+             python /scripts/init_flow.py"
+    volumes:
+      - ./langflow:/scripts
+    environment:
+      LANGFLOW_URL:                   http://langflow:7860
+      AEGRA_URL:                      http://template-server:8001
+      LANGFLOW_SUPERUSER:             admin
+      LANGFLOW_SUPERUSER_PASSWORD:    admin
+    depends_on:
+      langflow:
+        condition: service_healthy
+    restart: "no"
+
+  # ── GUI (nginx, serves frontend + proxies API calls) ──────────
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - template-server
+      - langflow
+
+volumes:
+  pgdata:
+  langflow_data:

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "k8s-shell": {
+      "type": "sse",
+      "url": "https://mcp.your-org.internal/k8s-shell",
+      "headers": {
+        "Authorization": "Bearer ${MCP_KEY}"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp/vfs"],
+      "env": {}
+    }
+  }
+}
